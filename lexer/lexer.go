@@ -56,7 +56,7 @@ func (lexer *Lexer) isPeekEnd() bool {
 }
 
 func (lexer *Lexer) createSimpleToken(tType token.TokenType) *token.Token {
-	return token.NewToken(token.PLUS, "", *lexer.pos.AsSEPos(&lexer.file))
+	return token.NewToken(tType, "", *lexer.pos.AsSEPos(&lexer.file))
 }
 
 func (lexer *Lexer) isDigit(c byte) bool {
@@ -143,8 +143,6 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 
 		lexer.advance()
 	}
-
-	fmt.Println(isFloat, string(lexer.currentChar), lexer.isDigit(lexer.peek()))
 
 	if lexer.currentChar == '.' && (lexer.isPeekEnd() || lexer.peek() == '\n') {
 		pos := lexer.pos
