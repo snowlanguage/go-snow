@@ -40,6 +40,8 @@ func (token *Token) ToString() string {
 		str = fmt.Sprintf("(INT: %s)", token.Value)
 	case FLOAT:
 		str = fmt.Sprintf("(FLOAT: %s)", token.Value)
+	case STRING:
+		str = fmt.Sprintf("(STRING: %s)", token.Value)
 	}
 
 	return str

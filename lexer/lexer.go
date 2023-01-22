@@ -106,6 +106,14 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 				} else {
 					errors = append(errors, err)
 				}
+			} else if lexer.currentChar == '"' || lexer.currentChar == '\'' {
+				fmt.Printf("lexer.currentChar: %v\n", string(lexer.currentChar))
+				tok, err := lexer.makeString()
+				if err == nil {
+					tokens = append(tokens, tok)
+				} else {
+					errors = append(errors, err)
+				}
 			} else {
 				errors = append(errors, *snowerror.NewSnowError(
 					snowerror.ILLEGAL_CHAR_ERROR,
@@ -197,6 +205,49 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 	), nil
 }
 
+func (lexer *Lexer) makeString() (token.Token, error) {
+	startPos := lexer.pos
+	startChar := lexer.currentChar
+	strValue := ""
+	endPos := startPos
+
+	lexer.advance()
+
+	for lexer.currentChar != startChar && !lexer.end && lexer.currentChar != '\n' {
+		strValue += string(lexer.currentChar)
+
+		endPos = lexer.pos
+
+		lexer.advance()
+	}
+
+	if lexer.end || lexer.currentChar == '\n' {
+		str := ""
+		if startChar == '"' {
+			str = fmt.Sprintf("'\"%s\"'", strValue)
+		} else {
+			str = fmt.Sprintf("\"'%s'\"", strValue)
+		}
+		return token.Token{}, snowerror.NewSnowError(
+			snowerror.UNTERMINATED_STRING_ERROR,
+			"the string was never closed",
+			fmt.Sprintf("Add a closing quote to the end of the string: %s", str),
+			*startPos.CreateSEPos(endPos, &lexer.file),
+		)
+	}
+
+	endPos = lexer.pos
+	lexer.advance()
+
+	fmt.Printf("strValue: %v\n", strValue)
+
+	return *token.NewToken(
+		token.STRING,
+		strValue,
+		*startPos.CreateSEPos(endPos, &lexer.file),
+	), nil
+}
+
 func (lexer *Lexer) makeComment() (token.Token, error) {
 	inline := false
 	startPos := lexer.pos
@@ -228,7 +279,7 @@ func (lexer *Lexer) makeComment() (token.Token, error) {
 
 	if inline && lexer.end {
 		return token.Token{}, snowerror.NewSnowError(
-			snowerror.UNTERMINATED_INLINE_COMMENT,
+			snowerror.UNTERMINATED_INLINE_COMMENT_ERROR,
 			"the inline comment was never closed",
 			"Add '/#' to close the inline comment",
 			*startPos.CreateSEPos(lastPos, &lexer.file),
