@@ -7,7 +7,8 @@ import (
 
 	"github.com/snowlanguage/go-snow/file"
 	"github.com/snowlanguage/go-snow/lexer"
-	"github.com/snowlanguage/go-snow/token"
+	parsevals "github.com/snowlanguage/go-snow/parseVals"
+	"github.com/snowlanguage/go-snow/parser"
 )
 
 func logErrors(errors []error) {
@@ -17,7 +18,7 @@ func logErrors(errors []error) {
 			return
 		}
 
-		fmt.Println(err)
+		fmt.Println(err.Error())
 	}
 }
 
@@ -63,10 +64,29 @@ func runRepl() {
 	}
 }
 
-func run(filename string, code string) ([]token.Token, []error) {
+func run(filename string, code string) ([]parsevals.Stmt, []error) {
 	f := file.NewFile(filename, code)
-	l := lexer.NewLexer(*f)
-	return l.Tokenize()
+	l := lexer.NewLexer(f)
+
+	t, err := l.Tokenize()
+
+	if len(err) != 0 {
+		return nil, err
+	}
+
+	for _, tok := range t {
+		fmt.Println("token", tok.ToString())
+	}
+
+	p := parser.NewParser(t, f)
+	s, err2 := p.Parse()
+
+	if err2 != nil {
+		var errArray = []error{err2}
+		return nil, errArray
+	}
+
+	return s, nil
 }
 
 func main() {

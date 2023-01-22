@@ -11,12 +11,12 @@ import (
 
 type Lexer struct {
 	pos         position.SimplePos
-	file        file.File
+	file        *file.File
 	currentChar byte
 	end         bool
 }
 
-func NewLexer(file file.File) *Lexer {
+func NewLexer(file *file.File) *Lexer {
 	return &Lexer{
 		pos:  *position.NewSimplePos(-1, 1, -1),
 		file: file,
@@ -56,7 +56,7 @@ func (lexer *Lexer) isPeekEnd() bool {
 }
 
 func (lexer *Lexer) createSimpleToken(tType token.TokenType) *token.Token {
-	return token.NewToken(tType, "", *lexer.pos.AsSEPos(&lexer.file))
+	return token.NewToken(tType, "", *lexer.pos.AsSEPos(lexer.file))
 }
 
 func (lexer *Lexer) isDigit(c byte) bool {
@@ -79,6 +79,13 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 
 	for !lexer.end {
 		switch lexer.currentChar {
+		case '\n':
+			tokens = append(tokens, *lexer.createSimpleToken(token.NEWLINE))
+			lexer.advance()
+		case ' ':
+			lexer.advance()
+		case '\t':
+			lexer.advance()
 		case '#':
 			_, err := lexer.makeComment()
 			if err != nil {
@@ -129,7 +136,7 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 					snowerror.ILLEGAL_CHAR_ERROR,
 					fmt.Sprintf("illegal character '%c'", lexer.currentChar),
 					"",
-					*lexer.pos.AsSEPos(&lexer.file),
+					*lexer.pos.AsSEPos(lexer.file),
 				))
 
 				lexer.advance()
@@ -155,7 +162,7 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 				return *token.NewToken(
 					token.FLOAT,
 					numberStr,
-					*startPos.CreateSEPos(lexer.pos, &lexer.file),
+					*startPos.CreateSEPos(lexer.pos, lexer.file),
 				), nil
 			} else if isFloat {
 				break
@@ -179,14 +186,14 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 				snowerror.TRAILING_DOT_ERROR,
 				"Trailing dots are not allowed",
 				fmt.Sprintf("To define a float add a zero after: '%s.0'", numberStr),
-				*pos.AsSEPos(&lexer.file),
+				*pos.AsSEPos(lexer.file),
 			)
 		} else {
 			return token.Token{}, snowerror.NewSnowError(
 				snowerror.MULTIPLE_DOTS_ERROR,
 				"More than one dot while defining a float is not allowed",
 				fmt.Sprintf("Remove the dot: '%s'", numberStr),
-				*pos.AsSEPos(&lexer.file),
+				*pos.AsSEPos(lexer.file),
 			)
 		}
 	} else if isFloat && lexer.currentChar == '.' && lexer.isDigit(lexer.peek()) {
@@ -198,7 +205,7 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 			snowerror.MULTIPLE_DOTS_ERROR,
 			"More than one dot while defining a float is not allowed",
 			fmt.Sprintf("Remove the dot: '%s'", numberStr),
-			*pos.AsSEPos(&lexer.file),
+			*pos.AsSEPos(lexer.file),
 		)
 	}
 
@@ -206,14 +213,14 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 		return *token.NewToken(
 			token.FLOAT,
 			numberStr,
-			*startPos.CreateSEPos(lexer.pos, &lexer.file),
+			*startPos.CreateSEPos(lexer.pos, lexer.file),
 		), nil
 	}
 
 	return *token.NewToken(
 		token.INT,
 		numberStr,
-		*startPos.CreateSEPos(lexer.pos, &lexer.file),
+		*startPos.CreateSEPos(lexer.pos, lexer.file),
 	), nil
 }
 
@@ -244,7 +251,7 @@ func (lexer *Lexer) makeString() (token.Token, error) {
 			snowerror.UNTERMINATED_STRING_ERROR,
 			"the string was never closed",
 			fmt.Sprintf("Add a closing quote to the end of the string: %s", str),
-			*startPos.CreateSEPos(endPos, &lexer.file),
+			*startPos.CreateSEPos(endPos, lexer.file),
 		)
 	}
 
@@ -254,7 +261,7 @@ func (lexer *Lexer) makeString() (token.Token, error) {
 	return *token.NewToken(
 		token.STRING,
 		strValue,
-		*startPos.CreateSEPos(endPos, &lexer.file),
+		*startPos.CreateSEPos(endPos, lexer.file),
 	), nil
 }
 
@@ -280,7 +287,7 @@ func (lexer *Lexer) makeIdentifierKeyword() (token.Token, error) {
 	return *token.NewToken(
 		tType,
 		valueStr,
-		*startPos.CreateSEPos(endPos, &lexer.file),
+		*startPos.CreateSEPos(endPos, lexer.file),
 	), nil
 }
 
@@ -318,7 +325,7 @@ func (lexer *Lexer) makeComment() (token.Token, error) {
 			snowerror.UNTERMINATED_INLINE_COMMENT_ERROR,
 			"the inline comment was never closed",
 			"Add '/#' to close the inline comment",
-			*startPos.CreateSEPos(lastPos, &lexer.file),
+			*startPos.CreateSEPos(lastPos, lexer.file),
 		)
 	}
 

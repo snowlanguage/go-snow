@@ -16,5 +16,7 @@ const (
 	STRING     TokenType = "STRING"
 	IDENTIFIER TokenType = "IDENTIFIER"
 
+	NEWLINE TokenType = "NEWLINE"
+
 	EOF TokenType = "EOF"
 )

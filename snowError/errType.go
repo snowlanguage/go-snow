@@ -8,4 +8,6 @@ const (
 	MULTIPLE_DOTS_ERROR               SnowErrType = "Multiple dots error"
 	UNTERMINATED_INLINE_COMMENT_ERROR SnowErrType = "Unterminated inline comment error"
 	UNTERMINATED_STRING_ERROR         SnowErrType = "Unterminated string error"
+	EXPECTED_TOKEN_ERROR              SnowErrType = "Expected token error"
+	INVALID_TOKEN_TYPE                SnowErrType = "Invalid token type"
 )
