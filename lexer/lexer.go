@@ -67,6 +67,10 @@ func (lexer *Lexer) isAlpha(c byte) bool {
 	return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'
 }
 
+func (lexer *Lexer) isAlphaDigit(c byte) bool {
+	return lexer.isAlpha(c) || lexer.isDigit(c)
+}
+
 func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 	tokens := make([]token.Token, 0)
 	errors := make([]error, 0)
@@ -107,8 +111,14 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 					errors = append(errors, err)
 				}
 			} else if lexer.currentChar == '"' || lexer.currentChar == '\'' {
-				fmt.Printf("lexer.currentChar: %v\n", string(lexer.currentChar))
 				tok, err := lexer.makeString()
+				if err == nil {
+					tokens = append(tokens, tok)
+				} else {
+					errors = append(errors, err)
+				}
+			} else if lexer.isAlpha(lexer.currentChar) {
+				tok, err := lexer.makeIdentifierKeyword()
 				if err == nil {
 					tokens = append(tokens, tok)
 				} else {
@@ -126,6 +136,8 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 			}
 		}
 	}
+
+	tokens = append(tokens, *lexer.createSimpleToken(token.EOF))
 
 	return tokens, errors
 }
@@ -239,11 +251,35 @@ func (lexer *Lexer) makeString() (token.Token, error) {
 	endPos = lexer.pos
 	lexer.advance()
 
-	fmt.Printf("strValue: %v\n", strValue)
-
 	return *token.NewToken(
 		token.STRING,
 		strValue,
+		*startPos.CreateSEPos(endPos, &lexer.file),
+	), nil
+}
+
+func (lexer *Lexer) makeIdentifierKeyword() (token.Token, error) {
+	startPos := lexer.pos
+	endPos := startPos
+	valueStr := string(lexer.currentChar)
+
+	lexer.advance()
+
+	for lexer.isAlphaDigit(lexer.currentChar) && !lexer.end {
+		valueStr += string(lexer.currentChar)
+
+		endPos = lexer.pos
+		lexer.advance()
+	}
+
+	tType, ok := token.Keywords[valueStr]
+	if !ok {
+		tType = token.IDENTIFIER
+	}
+
+	return *token.NewToken(
+		tType,
+		valueStr,
 		*startPos.CreateSEPos(endPos, &lexer.file),
 	), nil
 }
