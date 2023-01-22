@@ -8,7 +8,17 @@ import (
 )
 
 func main() {
-	f := file.NewFile("<repl>", "abc+/+-*-")
+	f := file.NewFile("<repl>", "123.4.567")
 	l := lexer.NewLexer(*f)
-	fmt.Println(l.Tokenize())
+	tokens, errors := l.Tokenize()
+
+	if len(errors) != 0 {
+		for _, err := range errors {
+			fmt.Println(err)
+		}
+	} else {
+		for _, token := range tokens {
+			fmt.Print(token.ToString())
+		}
+	}
 }

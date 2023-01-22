@@ -23,3 +23,11 @@ func (simplePos SimplePos) AsSEPos(file *file.File) *SEPos {
 		File:  file,
 	}
 }
+
+func (simplePos SimplePos) CreateSEPos(end SimplePos, file *file.File) *SEPos {
+	return &SEPos{
+		Start: *NewSimplePos(simplePos.Col, simplePos.Ln, simplePos.Idx),
+		End:   *NewSimplePos(end.Col, end.Ln, end.Idx),
+		File:  file,
+	}
+}
