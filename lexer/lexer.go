@@ -75,6 +75,11 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 
 	for !lexer.end {
 		switch lexer.currentChar {
+		case '#':
+			_, err := lexer.makeComment()
+			if err != nil {
+				errors = append(errors, err)
+			}
 		case '+':
 			tokens = append(tokens, *lexer.createSimpleToken(token.PLUS))
 			lexer.advance()
@@ -190,4 +195,45 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 		numberStr,
 		*startPos.CreateSEPos(lexer.pos, &lexer.file),
 	), nil
+}
+
+func (lexer *Lexer) makeComment() (token.Token, error) {
+	inline := false
+	startPos := lexer.pos
+	var lastPos position.SimplePos
+
+	lexer.advance()
+
+	lastPos = lexer.pos
+
+	if lexer.currentChar == '/' {
+		inline = true
+		lexer.advance()
+	}
+
+	for !lexer.end {
+		if inline && lexer.currentChar == '/' && lexer.peek() == '#' {
+			lexer.advance()
+			lexer.advance()
+
+			return token.Token{}, nil
+		} else if !inline && lexer.currentChar == '\n' {
+			return token.Token{}, nil
+		}
+
+		lastPos = lexer.pos
+
+		lexer.advance()
+	}
+
+	if inline && lexer.end {
+		return token.Token{}, snowerror.NewSnowError(
+			snowerror.UNTERMINATED_INLINE_COMMENT,
+			"the inline comment was never closed",
+			"Add '/#' to close the inline comment",
+			*startPos.CreateSEPos(lastPos, &lexer.file),
+		)
+	}
+
+	return token.Token{}, nil
 }

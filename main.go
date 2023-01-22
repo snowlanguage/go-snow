@@ -54,7 +54,9 @@ func runRepl() {
 				fmt.Print(tok.ToString() + " ")
 			}
 
-			fmt.Println()
+			if len(tokens) != 0 {
+				fmt.Println()
+			}
 		}
 
 		fmt.Print("> ")
