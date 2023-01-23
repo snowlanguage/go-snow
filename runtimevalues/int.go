@@ -42,7 +42,6 @@ func (rTInt *RTInt) GetEnvironment() *Environment {
 }
 
 func (rTInt *RTInt) Add(other RTValue, position position.SEPos) (RTValue, error) {
-	fmt.Println(rTInt.Value + other.GetValue().(int))
 	switch other.GetType() {
 	case RTT_INT:
 

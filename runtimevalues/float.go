@@ -42,8 +42,6 @@ func (rTFloat *RTFloat) GetEnvironment() *Environment {
 }
 
 func (rTFloat *RTFloat) Add(other RTValue, position position.SEPos) (RTValue, error) {
-	fmt.Println(rTFloat.Value + other.GetValue().(float64))
-	fmt.Println("here!!!")
 	switch other.GetType() {
 	case RTT_FLOAT:
 		return NewRTFloat(position, rTFloat.Value+other.GetValue().(float64), rTFloat.Environment), nil

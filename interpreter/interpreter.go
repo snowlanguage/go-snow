@@ -60,8 +60,6 @@ func (interpreter *Interpreter) execute(statement parsevals.Stmt, env *runtimeva
 }
 
 func (interpreter *Interpreter) evaluate(expression parsevals.Expr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
-	fmt.Println("evalueate")
-	fmt.Println(expression.ToString())
 	return expression.Accept(interpreter, env)
 }
 
@@ -75,7 +73,6 @@ func (interpreter *Interpreter) VisitExpressionStmt(stmt parsevals.ExpressionStm
 }
 
 func (interpreter *Interpreter) VisitBinaryExpr(expr parsevals.BinaryExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
-	fmt.Println("binary")
 	left, err := interpreter.evaluate(expr.Left, env)
 	if err != nil {
 		return nil, err
@@ -85,8 +82,6 @@ func (interpreter *Interpreter) VisitBinaryExpr(expr parsevals.BinaryExpr, env *
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println(expr.Tok.TType)
 
 	switch expr.Tok.TType {
 	case token.PLUS:

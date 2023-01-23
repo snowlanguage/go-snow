@@ -57,7 +57,7 @@ func runRepl() {
 			logErrors(errors)
 		} else {
 			for _, val := range values {
-				fmt.Print(val.ToString(), val.ValueToString()+" ")
+				fmt.Print(val.ValueToString() + " ")
 			}
 
 			if len(values) != 0 {

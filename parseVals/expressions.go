@@ -36,7 +36,6 @@ func NewBinaryExpr(left Expr, right Expr, tok token.Token, pos position.SEPos) *
 }
 
 func (binaryExpr BinaryExpr) Accept(visitor ExprVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
-	fmt.Println("visit bin")
 	return visitor.VisitBinaryExpr(binaryExpr, env)
 }
 

@@ -53,10 +53,7 @@ func (parser *Parser) binary(t1 token.TokenType, t2 token.TokenType, function fu
 		return nil, err
 	}
 
-	fmt.Println(parser.currentToken.TType, t1, t2, parser.index)
-
 	for parser.currentToken.TType == t1 || parser.currentToken.TType == t2 {
-		fmt.Printf("parser.currentToken: %v\n", parser.currentToken.TType)
 		opToken := parser.currentToken
 		parser.advance()
 
