@@ -53,9 +53,10 @@ func (parser *Parser) binary(t1 token.TokenType, t2 token.TokenType, function fu
 		return nil, err
 	}
 
-	parser.advance()
+	fmt.Println(parser.currentToken.TType, t1, t2, parser.index)
 
 	for parser.currentToken.TType == t1 || parser.currentToken.TType == t2 {
+		fmt.Printf("parser.currentToken: %v\n", parser.currentToken.TType)
 		opToken := parser.currentToken
 		parser.advance()
 
@@ -70,8 +71,6 @@ func (parser *Parser) binary(t1 token.TokenType, t2 token.TokenType, function fu
 			opToken,
 			*startPos.CreateSEPos(parser.currentToken.Pos.End, parser.currentToken.Pos.File),
 		)
-
-		parser.advance()
 	}
 
 	return left, nil
@@ -198,12 +197,16 @@ func (parser *Parser) term() (parsevals.Expr, error) {
 }
 
 func (parser *Parser) factor() (parsevals.Expr, error) {
-	unary, err := parser.unary()
+	binary, err := parser.binary(
+		token.STAR,
+		token.SLASH,
+		parser.unary,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return unary, nil
+	return binary, nil
 }
 
 func (parser *Parser) unary() (parsevals.Expr, error) {
@@ -225,27 +228,33 @@ func (parser *Parser) call() (parsevals.Expr, error) {
 }
 
 func (parser *Parser) primary() (parsevals.Expr, error) {
+	startToken := parser.currentToken
+
 	switch parser.currentToken.TType {
 	case token.INT:
-		intValue, err := strconv.Atoi(parser.currentToken.Value)
+		parser.advance()
+
+		intValue, err := strconv.Atoi(startToken.Value)
 		if err != nil {
 			return nil, snowerror.NewSnowError(
 				snowerror.TOO_BIG_VALUE_ERROR,
-				fmt.Sprintf("the value of number of type %s is too big", parser.currentToken.TType),
+				fmt.Sprintf("the value of number of type %s is too big", startToken.TType),
 				"",
-				parser.currentToken.Pos,
+				startToken.Pos,
 			)
 		}
 
 		return parsevals.NewIntLiteralExpr(intValue, parser.currentToken.Pos), nil
 	case token.FLOAT:
-		floatValue, err := strconv.ParseFloat(parser.currentToken.Value, 64)
+		parser.advance()
+
+		floatValue, err := strconv.ParseFloat(startToken.Value, 64)
 		if err != nil {
 			return nil, snowerror.NewSnowError(
 				snowerror.TOO_BIG_VALUE_ERROR,
-				fmt.Sprintf("the value of number of type %s is too big", parser.currentToken.TType),
+				fmt.Sprintf("the value of number of type %s is too big", startToken.TType),
 				"",
-				parser.currentToken.Pos,
+				startToken.Pos,
 			)
 		}
 

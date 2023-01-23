@@ -11,4 +11,7 @@ type RTValue interface {
 	GetValue() interface{}
 	GetEnvironment() *Environment
 	Add(other RTValue, position position.SEPos) (RTValue, error)
+	Subtract(other RTValue, position position.SEPos) (RTValue, error)
+	Multiply(other RTValue, position position.SEPos) (RTValue, error)
+	Divide(other RTValue, position position.SEPos) (RTValue, error)
 }

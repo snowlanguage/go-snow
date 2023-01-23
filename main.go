@@ -51,16 +51,16 @@ func runRepl() {
 			continue
 		}
 
-		tokens, errors := run("<repl>", code, env)
+		values, errors := run("<repl>", code, env)
 
 		if len(errors) != 0 {
 			logErrors(errors)
 		} else {
-			for _, tok := range tokens {
-				fmt.Print(tok.ToString() + " ")
+			for _, val := range values {
+				fmt.Print(val.ToString(), val.ValueToString()+" ")
 			}
 
-			if len(tokens) != 0 {
+			if len(values) != 0 {
 				fmt.Println()
 			}
 		}
@@ -79,9 +79,9 @@ func run(filename string, code string, e *runtimevalues.Environment) ([]runtimev
 		return nil, err
 	}
 
-	for _, tok := range t {
-		fmt.Println("token", tok.ToString())
-	}
+	// for _, tok := range t {
+	// 	fmt.Println("token", tok.ToString())
+	// }
 
 	p := parser.NewParser(t, f)
 	s, err2 := p.Parse()

@@ -44,7 +44,6 @@ func (interpreter *Interpreter) Interpret() ([]runtimevalues.RTValue, error) {
 	interpreter.advance()
 
 	for _, stmt := range interpreter.statements {
-		fmt.Println("a")
 		value, err := interpreter.execute(stmt, interpreter.environment)
 		if err != nil {
 			return nil, err
@@ -61,6 +60,8 @@ func (interpreter *Interpreter) execute(statement parsevals.Stmt, env *runtimeva
 }
 
 func (interpreter *Interpreter) evaluate(expression parsevals.Expr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	fmt.Println("evalueate")
+	fmt.Println(expression.ToString())
 	return expression.Accept(interpreter, env)
 }
 
@@ -74,6 +75,7 @@ func (interpreter *Interpreter) VisitExpressionStmt(stmt parsevals.ExpressionStm
 }
 
 func (interpreter *Interpreter) VisitBinaryExpr(expr parsevals.BinaryExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	fmt.Println("binary")
 	left, err := interpreter.evaluate(expr.Left, env)
 	if err != nil {
 		return nil, err
@@ -84,9 +86,17 @@ func (interpreter *Interpreter) VisitBinaryExpr(expr parsevals.BinaryExpr, env *
 		return nil, err
 	}
 
+	fmt.Println(expr.Tok.TType)
+
 	switch expr.Tok.TType {
 	case token.PLUS:
 		return left.Add(right, expr.Pos)
+	case token.DASH:
+		return left.Subtract(right, expr.Pos)
+	case token.STAR:
+		return left.Multiply(right, expr.Pos)
+	case token.SLASH:
+		return left.Divide(right, expr.Pos)
 	default:
 		return nil, snowerror.NewSnowError(
 			snowerror.INVALID_OP_TOKEN_ERROR,

@@ -28,20 +28,25 @@ func NewRuntimeError(errType snowerror.SnowErrType, msg string, tip string, pos 
 func NewValueRTError(opTType token.TokenType, x RTValue, y RTValue, pos position.SEPos, env *Environment) *RTError {
 	var msg string
 	var op string
+	var withBy string
 
 	switch opTType {
 	case token.PLUS:
 		op = "add"
+		withBy = "to"
 	case token.DASH:
 		op = "subtract"
+		withBy = "by"
 	case token.STAR:
 		op = "multiply"
+		withBy = "by"
 	case token.SLASH:
 		op = "divide"
+		withBy = "by"
 	}
 
 	if y != nil {
-		msg = fmt.Sprintf("unable to %s '%s' with value of '%s' to %s with value of '%s'", op, x.GetType(), x.ValueToString(), y.GetType(), y.ToString())
+		msg = fmt.Sprintf("unable to %s '%s' with value of '%s' to %s %s value of '%s'", op, x.GetType(), x.ValueToString(), withBy, y.GetType(), y.ToString())
 	} else {
 		msg = fmt.Sprintf("unable to %s '%s' with value of '%s'", op, x.GetType(), x.ValueToString())
 	}
@@ -50,6 +55,18 @@ func NewValueRTError(opTType token.TokenType, x RTValue, y RTValue, pos position
 		SnowError: *snowerror.NewSnowError(
 			snowerror.VALUE_ERROR,
 			msg,
+			"",
+			pos,
+		),
+		environment: env,
+	}
+}
+
+func NewDivisionByZeroRTError(x RTValue, y RTValue, pos position.SEPos, env *Environment) *RTError {
+	return &RTError{
+		SnowError: *snowerror.NewSnowError(
+			snowerror.VALUE_ERROR,
+			fmt.Sprintf("unable to divide '%s' with value of '%s' by '%s' with value of '%s'", x.GetType(), x.ValueToString(), y.GetType(), y.ValueToString()),
 			"",
 			pos,
 		),
