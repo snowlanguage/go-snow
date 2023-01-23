@@ -6,9 +6,10 @@ import (
 	"os"
 
 	"github.com/snowlanguage/go-snow/file"
+	"github.com/snowlanguage/go-snow/interpreter"
 	"github.com/snowlanguage/go-snow/lexer"
-	parsevals "github.com/snowlanguage/go-snow/parseVals"
 	"github.com/snowlanguage/go-snow/parser"
+	"github.com/snowlanguage/go-snow/runtimevalues"
 )
 
 func logErrors(errors []error) {
@@ -64,7 +65,7 @@ func runRepl() {
 	}
 }
 
-func run(filename string, code string) ([]parsevals.Stmt, []error) {
+func run(filename string, code string) ([]runtimevalues.RTValue, []error) {
 	f := file.NewFile(filename, code)
 	l := lexer.NewLexer(f)
 
@@ -86,7 +87,15 @@ func run(filename string, code string) ([]parsevals.Stmt, []error) {
 		return nil, errArray
 	}
 
-	return s, nil
+	i := interpreter.NewInterpreter(s, f)
+	v, err3 := i.Interpret()
+
+	if err3 != nil {
+		var errArray = []error{err3}
+		return nil, errArray
+	}
+
+	return v, nil
 }
 
 func main() {

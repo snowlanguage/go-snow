@@ -151,6 +151,7 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 
 func (lexer *Lexer) makeNumber() (token.Token, error) {
 	startPos := lexer.pos
+	endPos := startPos
 	numberStr := string(lexer.currentChar)
 	isFloat := false
 
@@ -162,7 +163,7 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 				return *token.NewToken(
 					token.FLOAT,
 					numberStr,
-					*startPos.CreateSEPos(lexer.pos, lexer.file),
+					*startPos.CreateSEPos(endPos, lexer.file),
 				), nil
 			} else if isFloat {
 				break
@@ -172,6 +173,8 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 		}
 
 		numberStr += string(lexer.currentChar)
+
+		endPos = lexer.pos
 
 		lexer.advance()
 	}
@@ -213,14 +216,14 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 		return *token.NewToken(
 			token.FLOAT,
 			numberStr,
-			*startPos.CreateSEPos(lexer.pos, lexer.file),
+			*startPos.CreateSEPos(endPos, lexer.file),
 		), nil
 	}
 
 	return *token.NewToken(
 		token.INT,
 		numberStr,
-		*startPos.CreateSEPos(lexer.pos, lexer.file),
+		*startPos.CreateSEPos(endPos, lexer.file),
 	), nil
 }
 

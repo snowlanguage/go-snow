@@ -4,15 +4,16 @@ import (
 	"fmt"
 
 	"github.com/snowlanguage/go-snow/position"
+	"github.com/snowlanguage/go-snow/runtimevalues"
 )
 
 type Expr interface {
-	Accept(visitor ExprVisitor) interface{}
+	Accept(visitor ExprVisitor) (runtimevalues.RTValue, error)
 	ToString() string
 }
 
 type ExprVisitor interface {
-	visitIntLiteralExpr(expr *IntLiteralExpr) interface{}
+	VisitIntLiteralExpr(expr IntLiteralExpr) (runtimevalues.RTValue, error)
 }
 
 type IntLiteralExpr struct {
@@ -27,10 +28,10 @@ func NewIntLiteralExpr(value int, pos position.SEPos) *IntLiteralExpr {
 	}
 }
 
-func (intLiteralExpr *IntLiteralExpr) Accept(visitor ExprVisitor) interface{} {
-	return visitor.visitIntLiteralExpr(intLiteralExpr)
+func (intLiteralExpr IntLiteralExpr) Accept(visitor ExprVisitor) (runtimevalues.RTValue, error) {
+	return visitor.VisitIntLiteralExpr(intLiteralExpr)
 }
 
-func (intLiteralExpr *IntLiteralExpr) ToString() string {
+func (intLiteralExpr IntLiteralExpr) ToString() string {
 	return fmt.Sprintf("(INT: %d)", intLiteralExpr.Value)
 }

@@ -1,14 +1,18 @@
 package parsevals
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/snowlanguage/go-snow/runtimevalues"
+)
 
 type Stmt interface {
-	Accept(visitor StmtVisitor) interface{}
+	Accept(visitor StmtVisitor) (runtimevalues.RTValue, error)
 	ToString() string
 }
 
 type StmtVisitor interface {
-	visitExpressionStmt(stmt *ExpressionStmt) interface{}
+	VisitExpressionStmt(stmt ExpressionStmt) (runtimevalues.RTValue, error)
 }
 
 type ExpressionStmt struct {
@@ -21,10 +25,10 @@ func NewExpressionStmt(expression Expr) *ExpressionStmt {
 	}
 }
 
-func (expressionStmt *ExpressionStmt) Accept(visitor StmtVisitor) interface{} {
-	return visitor.visitExpressionStmt(expressionStmt)
+func (expressionStmt ExpressionStmt) Accept(visitor StmtVisitor) (runtimevalues.RTValue, error) {
+	return visitor.VisitExpressionStmt(expressionStmt)
 }
 
-func (expressionStmt *ExpressionStmt) ToString() string {
+func (expressionStmt ExpressionStmt) ToString() string {
 	return fmt.Sprintf("(EXPRESSION: %s)", expressionStmt.Expression.ToString())
 }
