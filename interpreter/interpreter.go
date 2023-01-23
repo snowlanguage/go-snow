@@ -16,13 +16,15 @@ type Interpreter struct {
 	currentStmt parsevals.Stmt
 	index       int
 	end         bool
+	environment *runtimevalues.Environment
 }
 
-func NewInterpreter(statements []parsevals.Stmt, file *file.File) *Interpreter {
+func NewInterpreter(statements []parsevals.Stmt, file *file.File, env *runtimevalues.Environment) *Interpreter {
 	return &Interpreter{
-		statements: statements,
-		file:       file,
-		index:      -1,
+		statements:  statements,
+		file:        file,
+		index:       -1,
+		environment: env,
 	}
 }
 
@@ -43,7 +45,7 @@ func (interpreter *Interpreter) Interpret() ([]runtimevalues.RTValue, error) {
 
 	for _, stmt := range interpreter.statements {
 		fmt.Println("a")
-		value, err := interpreter.execute(stmt)
+		value, err := interpreter.execute(stmt, interpreter.environment)
 		if err != nil {
 			return nil, err
 		}
@@ -54,16 +56,16 @@ func (interpreter *Interpreter) Interpret() ([]runtimevalues.RTValue, error) {
 	return values, nil
 }
 
-func (interpreter *Interpreter) execute(statement parsevals.Stmt) (runtimevalues.RTValue, error) {
-	return statement.Accept(interpreter)
+func (interpreter *Interpreter) execute(statement parsevals.Stmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return statement.Accept(interpreter, env)
 }
 
-func (interpreter *Interpreter) evaluate(expression parsevals.Expr) (runtimevalues.RTValue, error) {
-	return expression.Accept(interpreter)
+func (interpreter *Interpreter) evaluate(expression parsevals.Expr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return expression.Accept(interpreter, env)
 }
 
-func (interpreter *Interpreter) VisitExpressionStmt(stmt parsevals.ExpressionStmt) (runtimevalues.RTValue, error) {
-	value, err := interpreter.evaluate(stmt.Expression)
+func (interpreter *Interpreter) VisitExpressionStmt(stmt parsevals.ExpressionStmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	value, err := interpreter.evaluate(stmt.Expression, env)
 	if err != nil {
 		return nil, err
 	}
@@ -71,13 +73,13 @@ func (interpreter *Interpreter) VisitExpressionStmt(stmt parsevals.ExpressionStm
 	return value, nil
 }
 
-func (interpreter *Interpreter) VisitBinaryExpr(expr parsevals.BinaryExpr) (runtimevalues.RTValue, error) {
-	left, err := interpreter.evaluate(expr.Left)
+func (interpreter *Interpreter) VisitBinaryExpr(expr parsevals.BinaryExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	left, err := interpreter.evaluate(expr.Left, env)
 	if err != nil {
 		return nil, err
 	}
 
-	right, err := interpreter.evaluate(expr.Right)
+	right, err := interpreter.evaluate(expr.Right, env)
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +97,10 @@ func (interpreter *Interpreter) VisitBinaryExpr(expr parsevals.BinaryExpr) (runt
 	}
 }
 
-func (interpreter *Interpreter) VisitIntLiteralExpr(expr parsevals.IntLiteralExpr) (runtimevalues.RTValue, error) {
-	return runtimevalues.NewRTInt(expr.Pos, expr.Value), nil
+func (interpreter *Interpreter) VisitIntLiteralExpr(expr parsevals.IntLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return runtimevalues.NewRTInt(expr.Pos, expr.Value, env), nil
+}
+
+func (interpreter *Interpreter) VisitFloatLiteralExpr(expr parsevals.FloatLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return runtimevalues.NewRTFloat(expr.Pos, expr.Value, env), nil
 }

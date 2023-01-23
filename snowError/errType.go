@@ -11,4 +11,6 @@ const (
 	EXPECTED_TOKEN_ERROR              SnowErrType = "Expected token error"
 	INVALID_TOKEN_TYPE_ERROR          SnowErrType = "Invalid token type error"
 	INVALID_OP_TOKEN_ERROR            SnowErrType = "Invalid op token error"
+	TOO_BIG_VALUE_ERROR               SnowErrType = "Too big value error"
+	VALUE_ERROR                       SnowErrType = "Value error"
 )

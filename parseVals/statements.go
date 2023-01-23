@@ -7,12 +7,12 @@ import (
 )
 
 type Stmt interface {
-	Accept(visitor StmtVisitor) (runtimevalues.RTValue, error)
+	Accept(visitor StmtVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	ToString() string
 }
 
 type StmtVisitor interface {
-	VisitExpressionStmt(stmt ExpressionStmt) (runtimevalues.RTValue, error)
+	VisitExpressionStmt(stmt ExpressionStmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 }
 
 type ExpressionStmt struct {
@@ -25,8 +25,8 @@ func NewExpressionStmt(expression Expr) *ExpressionStmt {
 	}
 }
 
-func (expressionStmt ExpressionStmt) Accept(visitor StmtVisitor) (runtimevalues.RTValue, error) {
-	return visitor.VisitExpressionStmt(expressionStmt)
+func (expressionStmt ExpressionStmt) Accept(visitor StmtVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return visitor.VisitExpressionStmt(expressionStmt, env)
 }
 
 func (expressionStmt ExpressionStmt) ToString() string {

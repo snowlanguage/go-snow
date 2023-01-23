@@ -2,7 +2,6 @@ package parser
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/snowlanguage/go-snow/file"
@@ -230,10 +229,27 @@ func (parser *Parser) primary() (parsevals.Expr, error) {
 	case token.INT:
 		intValue, err := strconv.Atoi(parser.currentToken.Value)
 		if err != nil {
-			log.Panic(err)
+			return nil, snowerror.NewSnowError(
+				snowerror.TOO_BIG_VALUE_ERROR,
+				fmt.Sprintf("the value of number of type %s is too big", parser.currentToken.TType),
+				"",
+				parser.currentToken.Pos,
+			)
 		}
 
 		return parsevals.NewIntLiteralExpr(intValue, parser.currentToken.Pos), nil
+	case token.FLOAT:
+		floatValue, err := strconv.ParseFloat(parser.currentToken.Value, 64)
+		if err != nil {
+			return nil, snowerror.NewSnowError(
+				snowerror.TOO_BIG_VALUE_ERROR,
+				fmt.Sprintf("the value of number of type %s is too big", parser.currentToken.TType),
+				"",
+				parser.currentToken.Pos,
+			)
+		}
+
+		return parsevals.NewFloatLiteralExpr(floatValue, parser.currentToken.Pos), nil
 	default:
 		err := snowerror.NewSnowError(
 			snowerror.INVALID_TOKEN_TYPE_ERROR,

@@ -9,13 +9,14 @@ import (
 )
 
 type Expr interface {
-	Accept(visitor ExprVisitor) (runtimevalues.RTValue, error)
+	Accept(visitor ExprVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	ToString() string
 }
 
 type ExprVisitor interface {
-	VisitBinaryExpr(expr BinaryExpr) (runtimevalues.RTValue, error)
-	VisitIntLiteralExpr(expr IntLiteralExpr) (runtimevalues.RTValue, error)
+	VisitBinaryExpr(expr BinaryExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
+	VisitIntLiteralExpr(expr IntLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
+	VisitFloatLiteralExpr(expr FloatLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 }
 
 type BinaryExpr struct {
@@ -34,8 +35,8 @@ func NewBinaryExpr(left Expr, right Expr, tok token.Token, pos position.SEPos) *
 	}
 }
 
-func (binaryExpr BinaryExpr) Accept(visitor ExprVisitor) (runtimevalues.RTValue, error) {
-	return visitor.VisitBinaryExpr(binaryExpr)
+func (binaryExpr BinaryExpr) Accept(visitor ExprVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return visitor.VisitBinaryExpr(binaryExpr, env)
 }
 
 func (binaryExpr BinaryExpr) ToString() string {
@@ -54,10 +55,30 @@ func NewIntLiteralExpr(value int, pos position.SEPos) *IntLiteralExpr {
 	}
 }
 
-func (intLiteralExpr IntLiteralExpr) Accept(visitor ExprVisitor) (runtimevalues.RTValue, error) {
-	return visitor.VisitIntLiteralExpr(intLiteralExpr)
+func (intLiteralExpr IntLiteralExpr) Accept(visitor ExprVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return visitor.VisitIntLiteralExpr(intLiteralExpr, env)
 }
 
 func (intLiteralExpr IntLiteralExpr) ToString() string {
 	return fmt.Sprintf("(INT: %d)", intLiteralExpr.Value)
+}
+
+type FloatLiteralExpr struct {
+	Value float64
+	Pos   position.SEPos
+}
+
+func NewFloatLiteralExpr(value float64, pos position.SEPos) *FloatLiteralExpr {
+	return &FloatLiteralExpr{
+		Value: value,
+		Pos:   pos,
+	}
+}
+
+func (floatLiteralExpr FloatLiteralExpr) Accept(visitor ExprVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return visitor.VisitFloatLiteralExpr(floatLiteralExpr, env)
+}
+
+func (floatLiteralExpr FloatLiteralExpr) ToString() string {
+	return fmt.Sprintf("(FLOAT: %f)", floatLiteralExpr.Value)
 }

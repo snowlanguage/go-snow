@@ -29,7 +29,9 @@ func runFile(file string) {
 		panic(err)
 	}
 
-	_, errors := run(file, string(code))
+	env := runtimevalues.NewEnvironment(nil, file, 1)
+
+	_, errors := run(file, string(code), env)
 
 	if len(errors) != 0 {
 		logErrors(errors)
@@ -39,6 +41,8 @@ func runFile(file string) {
 func runRepl() {
 	input := bufio.NewScanner(os.Stdin)
 
+	env := runtimevalues.NewEnvironment(nil, "<repl>", 1)
+
 	fmt.Print("> ")
 	for input.Scan() {
 		code := input.Text()
@@ -47,7 +51,7 @@ func runRepl() {
 			continue
 		}
 
-		tokens, errors := run("<repl>", code)
+		tokens, errors := run("<repl>", code, env)
 
 		if len(errors) != 0 {
 			logErrors(errors)
@@ -65,7 +69,7 @@ func runRepl() {
 	}
 }
 
-func run(filename string, code string) ([]runtimevalues.RTValue, []error) {
+func run(filename string, code string, e *runtimevalues.Environment) ([]runtimevalues.RTValue, []error) {
 	f := file.NewFile(filename, code)
 	l := lexer.NewLexer(f)
 
@@ -87,7 +91,7 @@ func run(filename string, code string) ([]runtimevalues.RTValue, []error) {
 		return nil, errArray
 	}
 
-	i := interpreter.NewInterpreter(s, f)
+	i := interpreter.NewInterpreter(s, f, e)
 	v, err3 := i.Interpret()
 
 	if err3 != nil {
