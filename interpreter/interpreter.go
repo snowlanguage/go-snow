@@ -6,6 +6,8 @@ import (
 	"github.com/snowlanguage/go-snow/file"
 	parsevals "github.com/snowlanguage/go-snow/parseVals"
 	"github.com/snowlanguage/go-snow/runtimevalues"
+	snowerror "github.com/snowlanguage/go-snow/snowError"
+	"github.com/snowlanguage/go-snow/token"
 )
 
 type Interpreter struct {
@@ -67,6 +69,30 @@ func (interpreter *Interpreter) VisitExpressionStmt(stmt parsevals.ExpressionStm
 	}
 
 	return value, nil
+}
+
+func (interpreter *Interpreter) VisitBinaryExpr(expr parsevals.BinaryExpr) (runtimevalues.RTValue, error) {
+	left, err := interpreter.evaluate(expr.Left)
+	if err != nil {
+		return nil, err
+	}
+
+	right, err := interpreter.evaluate(expr.Right)
+	if err != nil {
+		return nil, err
+	}
+
+	switch expr.Tok.TType {
+	case token.PLUS:
+		return left.Add(right, expr.Pos)
+	default:
+		return nil, snowerror.NewSnowError(
+			snowerror.INVALID_OP_TOKEN_ERROR,
+			fmt.Sprintf("the op token '%s' is not valid", expr.Tok.TType),
+			"",
+			expr.Pos,
+		)
+	}
 }
 
 func (interpreter *Interpreter) VisitIntLiteralExpr(expr parsevals.IntLiteralExpr) (runtimevalues.RTValue, error) {

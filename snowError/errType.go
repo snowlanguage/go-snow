@@ -9,5 +9,6 @@ const (
 	UNTERMINATED_INLINE_COMMENT_ERROR SnowErrType = "Unterminated inline comment error"
 	UNTERMINATED_STRING_ERROR         SnowErrType = "Unterminated string error"
 	EXPECTED_TOKEN_ERROR              SnowErrType = "Expected token error"
-	INVALID_TOKEN_TYPE                SnowErrType = "Invalid token type"
+	INVALID_TOKEN_TYPE_ERROR          SnowErrType = "Invalid token type error"
+	INVALID_OP_TOKEN_ERROR            SnowErrType = "Invalid op token error"
 )

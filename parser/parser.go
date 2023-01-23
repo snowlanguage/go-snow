@@ -46,6 +46,38 @@ func (parser *Parser) consume(tType token.TokenType) error {
 	return nil
 }
 
+func (parser *Parser) binary(t1 token.TokenType, t2 token.TokenType, function func() (parsevals.Expr, error)) (parsevals.Expr, error) {
+	startPos := parser.currentToken.Pos.Start
+
+	left, err := function()
+	if err != nil {
+		return nil, err
+	}
+
+	parser.advance()
+
+	for parser.currentToken.TType == t1 || parser.currentToken.TType == t2 {
+		opToken := parser.currentToken
+		parser.advance()
+
+		right, err := function()
+		if err != nil {
+			return nil, err
+		}
+
+		left = parsevals.NewBinaryExpr(
+			left,
+			right,
+			opToken,
+			*startPos.CreateSEPos(parser.currentToken.Pos.End, parser.currentToken.Pos.File),
+		)
+
+		parser.advance()
+	}
+
+	return left, nil
+}
+
 func (parser *Parser) Parse() ([]parsevals.Stmt, error) {
 	statements := make([]parsevals.Stmt, 0)
 
@@ -154,12 +186,16 @@ func (parser *Parser) comparison() (parsevals.Expr, error) {
 }
 
 func (parser *Parser) term() (parsevals.Expr, error) {
-	factor, err := parser.factor()
+	binary, err := parser.binary(
+		token.PLUS,
+		token.DASH,
+		parser.factor,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return factor, nil
+	return binary, nil
 }
 
 func (parser *Parser) factor() (parsevals.Expr, error) {
@@ -200,7 +236,7 @@ func (parser *Parser) primary() (parsevals.Expr, error) {
 		return parsevals.NewIntLiteralExpr(intValue, parser.currentToken.Pos), nil
 	default:
 		err := snowerror.NewSnowError(
-			snowerror.INVALID_TOKEN_TYPE,
+			snowerror.INVALID_TOKEN_TYPE_ERROR,
 			fmt.Sprintf("token of type '%s' is invalid", parser.currentToken.TType),
 			"",
 			parser.currentToken.Pos,
