@@ -92,6 +92,18 @@ func (interpreter *Interpreter) VisitBinaryExpr(expr parsevals.BinaryExpr, env *
 		return left.Multiply(right, expr.Pos)
 	case token.SLASH:
 		return left.Divide(right, expr.Pos)
+	case token.EQUALS:
+		return left.Equals(right, expr.Pos)
+	case token.NOT_EQUALS:
+		return left.NotEquals(right, expr.Pos)
+	case token.GREATER_THAN:
+		return left.GreaterThan(right, expr.Pos)
+	case token.GREATER_THAN_EQUALS:
+		return left.GreaterThanEquals(right, expr.Pos)
+	case token.LESS_THAN:
+		return left.LessThan(right, expr.Pos)
+	case token.LESS_THAN_EQUALS:
+		return left.LessThanEquals(right, expr.Pos)
 	default:
 		return nil, snowerror.NewSnowError(
 			snowerror.INVALID_OP_TOKEN_ERROR,

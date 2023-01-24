@@ -43,10 +43,28 @@ func NewValueRTError(opTType token.TokenType, x RTValue, y RTValue, pos position
 	case token.SLASH:
 		op = "divide"
 		withBy = "by"
+	case token.EQUALS:
+		op = "check equality between"
+		withBy = "and"
+	case token.NOT_EQUALS:
+		op = "check inequality between"
+		withBy = "and"
+	case token.GREATER_THAN:
+		op = "compare size of"
+		withBy = "and"
+	case token.GREATER_THAN_EQUALS:
+		op = "compare size of"
+		withBy = "and"
+	case token.LESS_THAN:
+		op = "compare size of"
+		withBy = "and"
+	case token.LESS_THAN_EQUALS:
+		op = "compare size of"
+		withBy = "and"
 	}
 
 	if y != nil {
-		msg = fmt.Sprintf("unable to %s '%s' with value of '%s' to %s %s value of '%s'", op, x.GetType(), x.ValueToString(), withBy, y.GetType(), y.ToString())
+		msg = fmt.Sprintf("unable to %s '%s' with value of '%s' %s '%s' value of '%s'", op, x.GetType(), x.ValueToString(), withBy, y.GetType(), y.ValueToString())
 	} else {
 		msg = fmt.Sprintf("unable to %s '%s' with value of '%s'", op, x.GetType(), x.ValueToString())
 	}

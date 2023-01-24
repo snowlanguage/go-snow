@@ -38,6 +38,18 @@ func (token *Token) ToString() string {
 		str = ")"
 	case EOF:
 		str = "(EOF)"
+	case SINGLE_EQUALS:
+		str = "="
+	case EQUALS:
+		str = "=="
+	case GREATER_THAN:
+		str = ">"
+	case GREATER_THAN_EQUALS:
+		str = ">="
+	case LESS_THAN:
+		str = "<"
+	case LESS_THAN_EQUALS:
+		str = "<="
 	case INT:
 		str = fmt.Sprintf("(INT: %s)", token.Value)
 	case FLOAT:

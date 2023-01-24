@@ -45,7 +45,7 @@ func (parser *Parser) consume(tType token.TokenType) error {
 	return nil
 }
 
-func (parser *Parser) binary(t1 token.TokenType, t2 token.TokenType, function func() (parsevals.Expr, error)) (parsevals.Expr, error) {
+func (parser *Parser) binary(t1 token.TokenType, t2 token.TokenType, t3 token.TokenType, t4 token.TokenType, function func() (parsevals.Expr, error)) (parsevals.Expr, error) {
 	startPos := parser.currentToken.Pos.Start
 
 	left, err := function()
@@ -53,9 +53,11 @@ func (parser *Parser) binary(t1 token.TokenType, t2 token.TokenType, function fu
 		return nil, err
 	}
 
-	for parser.currentToken.TType == t1 || parser.currentToken.TType == t2 {
+	for parser.currentToken.TType == t1 || parser.currentToken.TType == t2 || parser.currentToken.TType == t3 || parser.currentToken.TType == t4 {
 		opToken := parser.currentToken
 		parser.advance()
+
+		endPos := parser.currentToken.Pos
 
 		right, err := function()
 		if err != nil {
@@ -66,7 +68,7 @@ func (parser *Parser) binary(t1 token.TokenType, t2 token.TokenType, function fu
 			left,
 			right,
 			opToken,
-			*startPos.CreateSEPos(parser.currentToken.Pos.End, parser.currentToken.Pos.File),
+			*startPos.CreateSEPos(endPos.End, parser.currentToken.Pos.File),
 		)
 	}
 
@@ -163,27 +165,41 @@ func (parser *Parser) logicAnd() (parsevals.Expr, error) {
 }
 
 func (parser *Parser) equality() (parsevals.Expr, error) {
-	comparison, err := parser.comparison()
+	binary, err := parser.binary(
+		token.EQUALS,
+		token.NOT_EQUALS,
+		token.PLACEHOLDER,
+		token.PLACEHOLDER,
+		parser.comparison,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return comparison, nil
+	return binary, nil
 }
 
 func (parser *Parser) comparison() (parsevals.Expr, error) {
-	term, err := parser.term()
+	binary, err := parser.binary(
+		token.GREATER_THAN,
+		token.GREATER_THAN_EQUALS,
+		token.LESS_THAN,
+		token.LESS_THAN_EQUALS,
+		parser.term,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return term, nil
+	return binary, nil
 }
 
 func (parser *Parser) term() (parsevals.Expr, error) {
 	binary, err := parser.binary(
 		token.PLUS,
 		token.DASH,
+		token.PLACEHOLDER,
+		token.PLACEHOLDER,
 		parser.factor,
 	)
 	if err != nil {
@@ -197,6 +213,8 @@ func (parser *Parser) factor() (parsevals.Expr, error) {
 	binary, err := parser.binary(
 		token.STAR,
 		token.SLASH,
+		token.PLACEHOLDER,
+		token.PLACEHOLDER,
 		parser.unary,
 	)
 	if err != nil {

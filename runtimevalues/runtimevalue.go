@@ -14,4 +14,10 @@ type RTValue interface {
 	Subtract(other RTValue, position position.SEPos) (RTValue, error)
 	Multiply(other RTValue, position position.SEPos) (RTValue, error)
 	Divide(other RTValue, position position.SEPos) (RTValue, error)
+	Equals(other RTValue, position position.SEPos) (RTValue, error)
+	NotEquals(other RTValue, position position.SEPos) (RTValue, error)
+	GreaterThan(other RTValue, position position.SEPos) (RTValue, error)
+	GreaterThanEquals(other RTValue, position position.SEPos) (RTValue, error)
+	LessThan(other RTValue, position position.SEPos) (RTValue, error)
+	LessThanEquals(other RTValue, position position.SEPos) (RTValue, error)
 }

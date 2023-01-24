@@ -117,3 +117,93 @@ func (rTInt *RTInt) Divide(other RTValue, position position.SEPos) (RTValue, err
 		rTInt.Environment,
 	)
 }
+
+func (rTInt *RTInt) Equals(other RTValue, position position.SEPos) (RTValue, error) {
+	switch other.GetType() {
+	case RTT_INT:
+		return NewRTBool(position, rTInt.Value == other.GetValue().(int), rTInt.Environment), nil
+	case RTT_FLOAT:
+		return NewRTBool(position, float64(rTInt.Value) == other.GetValue().(float64), rTInt.Environment), nil
+	}
+
+	return NewRTBool(position, false, rTInt.Environment), nil
+}
+
+func (rTInt *RTInt) NotEquals(other RTValue, position position.SEPos) (RTValue, error) {
+	switch other.GetType() {
+	case RTT_INT:
+		return NewRTBool(position, rTInt.Value != other.GetValue().(int), rTInt.Environment), nil
+	case RTT_FLOAT:
+		return NewRTBool(position, float64(rTInt.Value) != other.GetValue().(float64), rTInt.Environment), nil
+	}
+
+	return NewRTBool(position, true, rTInt.Environment), nil
+}
+
+func (rTInt *RTInt) GreaterThan(other RTValue, position position.SEPos) (RTValue, error) {
+	switch other.GetType() {
+	case RTT_INT:
+		return NewRTBool(position, rTInt.Value > other.GetValue().(int), rTInt.Environment), nil
+	case RTT_FLOAT:
+		return NewRTBool(position, float64(rTInt.Value) > other.GetValue().(float64), rTInt.Environment), nil
+	}
+
+	return nil, NewValueRTError(
+		token.GREATER_THAN,
+		rTInt,
+		other,
+		position,
+		rTInt.Environment,
+	)
+}
+
+func (rTInt *RTInt) GreaterThanEquals(other RTValue, position position.SEPos) (RTValue, error) {
+	switch other.GetType() {
+	case RTT_INT:
+		return NewRTBool(position, rTInt.Value >= other.GetValue().(int), rTInt.Environment), nil
+	case RTT_FLOAT:
+		return NewRTBool(position, float64(rTInt.Value) >= other.GetValue().(float64), rTInt.Environment), nil
+	}
+
+	return nil, NewValueRTError(
+		token.GREATER_THAN_EQUALS,
+		rTInt,
+		other,
+		position,
+		rTInt.Environment,
+	)
+}
+
+func (rTInt *RTInt) LessThan(other RTValue, position position.SEPos) (RTValue, error) {
+	switch other.GetType() {
+	case RTT_INT:
+		return NewRTBool(position, rTInt.Value < other.GetValue().(int), rTInt.Environment), nil
+	case RTT_FLOAT:
+		return NewRTBool(position, float64(rTInt.Value) < other.GetValue().(float64), rTInt.Environment), nil
+	}
+
+	return nil, NewValueRTError(
+		token.LESS_THAN,
+		rTInt,
+		other,
+		position,
+		rTInt.Environment,
+	)
+}
+
+func (rTInt *RTInt) LessThanEquals(other RTValue, position position.SEPos) (RTValue, error) {
+	switch other.GetType() {
+	case RTT_INT:
+		return NewRTBool(position, rTInt.Value <= other.GetValue().(int), rTInt.Environment), nil
+	case RTT_FLOAT:
+		return NewRTBool(position, float64(rTInt.Value) <= other.GetValue().(float64), rTInt.Environment), nil
+	}
+
+	return nil, NewValueRTError(
+		token.LESS_THAN_EQUALS,
+		rTInt,
+		other,
+		position,
+		rTInt.Environment,
+	)
+}

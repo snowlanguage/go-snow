@@ -34,6 +34,7 @@ func (lexer *Lexer) advance() {
 
 	if lexer.pos.Idx >= len(lexer.file.Code) {
 		lexer.end = true
+		lexer.currentChar = 0x0
 	} else {
 		lexer.currentChar = lexer.file.Code[lexer.pos.Idx]
 	}
@@ -78,6 +79,8 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 	lexer.advance()
 
 	for !lexer.end {
+		startPos := lexer.pos
+
 		switch lexer.currentChar {
 		case '\n':
 			tokens = append(tokens, *lexer.createSimpleToken(token.NEWLINE))
@@ -109,6 +112,48 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 		case ')':
 			tokens = append(tokens, *lexer.createSimpleToken(token.RPAREN))
 			lexer.advance()
+		case '=':
+			if !lexer.end && lexer.peek() == '=' {
+				tokens = append(tokens, *token.NewToken(
+					token.EQUALS,
+					"",
+					*startPos.CreateSEPos(lexer.pos, lexer.file),
+				))
+
+				lexer.advance()
+				lexer.advance()
+			} else {
+				tokens = append(tokens, *lexer.createSimpleToken(token.SINGLE_EQUALS))
+				lexer.advance()
+			}
+		case '<':
+			if !lexer.end && lexer.peek() == '=' {
+				tokens = append(tokens, *token.NewToken(
+					token.LESS_THAN_EQUALS,
+					"",
+					*startPos.CreateSEPos(lexer.pos, lexer.file),
+				))
+
+				lexer.advance()
+				lexer.advance()
+			} else {
+				tokens = append(tokens, *lexer.createSimpleToken(token.LESS_THAN))
+				lexer.advance()
+			}
+		case '>':
+			if !lexer.end && lexer.peek() == '=' {
+				tokens = append(tokens, *token.NewToken(
+					token.GREATER_THAN_EQUALS,
+					"",
+					*startPos.CreateSEPos(lexer.pos, lexer.file),
+				))
+
+				lexer.advance()
+				lexer.advance()
+			} else {
+				tokens = append(tokens, *lexer.createSimpleToken(token.GREATER_THAN))
+				lexer.advance()
+			}
 		default:
 			if lexer.isDigit(lexer.currentChar) {
 				tok, err := lexer.makeNumber()
@@ -131,6 +176,15 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 				} else {
 					errors = append(errors, err)
 				}
+			} else if lexer.currentChar == '!' && lexer.peek() == '=' {
+				tokens = append(tokens, *token.NewToken(
+					token.NOT_EQUALS,
+					"",
+					*startPos.CreateSEPos(lexer.pos, lexer.file),
+				))
+
+				lexer.advance()
+				lexer.advance()
 			} else {
 				errors = append(errors, *snowerror.NewSnowError(
 					snowerror.ILLEGAL_CHAR_ERROR,
@@ -220,11 +274,13 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 		), nil
 	}
 
-	return *token.NewToken(
+	tok := *token.NewToken(
 		token.INT,
 		numberStr,
 		*startPos.CreateSEPos(endPos, lexer.file),
-	), nil
+	)
+
+	return tok, nil
 }
 
 func (lexer *Lexer) makeString() (token.Token, error) {
