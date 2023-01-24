@@ -114,6 +114,8 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 			lexer.advance()
 		case '=':
 			if !lexer.end && lexer.peek() == '=' {
+				lexer.advance()
+
 				tokens = append(tokens, *token.NewToken(
 					token.EQUALS,
 					"",
@@ -121,13 +123,14 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 				))
 
 				lexer.advance()
-				lexer.advance()
 			} else {
 				tokens = append(tokens, *lexer.createSimpleToken(token.SINGLE_EQUALS))
 				lexer.advance()
 			}
 		case '<':
 			if !lexer.end && lexer.peek() == '=' {
+				lexer.advance()
+
 				tokens = append(tokens, *token.NewToken(
 					token.LESS_THAN_EQUALS,
 					"",
@@ -135,20 +138,20 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 				))
 
 				lexer.advance()
-				lexer.advance()
 			} else {
 				tokens = append(tokens, *lexer.createSimpleToken(token.LESS_THAN))
 				lexer.advance()
 			}
 		case '>':
 			if !lexer.end && lexer.peek() == '=' {
+				lexer.advance()
+
 				tokens = append(tokens, *token.NewToken(
 					token.GREATER_THAN_EQUALS,
 					"",
 					*startPos.CreateSEPos(lexer.pos, lexer.file),
 				))
 
-				lexer.advance()
 				lexer.advance()
 			} else {
 				tokens = append(tokens, *lexer.createSimpleToken(token.GREATER_THAN))
@@ -177,13 +180,14 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 					errors = append(errors, err)
 				}
 			} else if lexer.currentChar == '!' && lexer.peek() == '=' {
+				lexer.advance()
+
 				tokens = append(tokens, *token.NewToken(
 					token.NOT_EQUALS,
 					"",
 					*startPos.CreateSEPos(lexer.pos, lexer.file),
 				))
 
-				lexer.advance()
 				lexer.advance()
 			} else {
 				errors = append(errors, *snowerror.NewSnowError(

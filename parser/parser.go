@@ -274,6 +274,14 @@ func (parser *Parser) primary() (parsevals.Expr, error) {
 		}
 
 		return parsevals.NewFloatLiteralExpr(floatValue, parser.currentToken.Pos), nil
+	case token.TRUE:
+		parser.advance()
+
+		return parsevals.NewBoolLiteralExpr(true, startToken.Pos), nil
+	case token.FALSE:
+		parser.advance()
+
+		return parsevals.NewBoolLiteralExpr(false, startToken.Pos), nil
 	default:
 		err := snowerror.NewSnowError(
 			snowerror.INVALID_TOKEN_TYPE_ERROR,

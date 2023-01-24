@@ -24,7 +24,9 @@ const (
 	STRING     TokenType = "STRING"
 	IDENTIFIER TokenType = "IDENTIFIER"
 
-	NOT TokenType = "NOT"
+	NOT   TokenType = "NOT"
+	TRUE  TokenType = "TRUE"
+	FALSE TokenType = "FALSE"
 
 	NEWLINE TokenType = "NEWLINE"
 

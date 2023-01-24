@@ -73,7 +73,7 @@ func run(filename string, code string, e *runtimevalues.Environment) ([]runtimev
 	f := file.NewFile(filename, code)
 	l := lexer.NewLexer(f)
 
-	fmt.Println("Tokenizing")
+	// fmt.Println("Tokenizing")
 
 	t, err := l.Tokenize()
 
@@ -81,13 +81,13 @@ func run(filename string, code string, e *runtimevalues.Environment) ([]runtimev
 		return nil, err
 	}
 
-	for _, tok := range t {
-		fmt.Println("token", tok.ToString())
-	}
+	// for _, tok := range t {
+	// 	fmt.Println("token", tok.ToString())
+	// }
 
 	p := parser.NewParser(t, f)
 
-	fmt.Println("Parsing")
+	// fmt.Println("Parsing")
 
 	s, err2 := p.Parse()
 
@@ -98,7 +98,7 @@ func run(filename string, code string, e *runtimevalues.Environment) ([]runtimev
 
 	i := interpreter.NewInterpreter(s, f, e)
 
-	fmt.Println("Interpreting")
+	// fmt.Println("Interpreting")
 
 	v, err3 := i.Interpret()
 

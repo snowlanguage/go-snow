@@ -50,21 +50,21 @@ func NewValueRTError(opTType token.TokenType, x RTValue, y RTValue, pos position
 		op = "check inequality between"
 		withBy = "and"
 	case token.GREATER_THAN:
-		op = "compare size of"
+		op = "compare sizes between"
 		withBy = "and"
 	case token.GREATER_THAN_EQUALS:
-		op = "compare size of"
+		op = "compare sizes between"
 		withBy = "and"
 	case token.LESS_THAN:
-		op = "compare size of"
+		op = "compare sizes between"
 		withBy = "and"
 	case token.LESS_THAN_EQUALS:
-		op = "compare size of"
+		op = "compare sizes between"
 		withBy = "and"
 	}
 
 	if y != nil {
-		msg = fmt.Sprintf("unable to %s '%s' with value of '%s' %s '%s' value of '%s'", op, x.GetType(), x.ValueToString(), withBy, y.GetType(), y.ValueToString())
+		msg = fmt.Sprintf("unable to %s '%s' with value of '%s' %s '%s' with value of '%s'", op, x.GetType(), x.ValueToString(), withBy, y.GetType(), y.ValueToString())
 	} else {
 		msg = fmt.Sprintf("unable to %s '%s' with value of '%s'", op, x.GetType(), x.ValueToString())
 	}

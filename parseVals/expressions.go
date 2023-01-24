@@ -17,6 +17,7 @@ type ExprVisitor interface {
 	VisitBinaryExpr(expr BinaryExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitIntLiteralExpr(expr IntLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitFloatLiteralExpr(expr FloatLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
+	VisitBoolLiteralExpr(expr BoolLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 }
 
 type BinaryExpr struct {
@@ -81,4 +82,24 @@ func (floatLiteralExpr FloatLiteralExpr) Accept(visitor ExprVisitor, env *runtim
 
 func (floatLiteralExpr FloatLiteralExpr) ToString() string {
 	return fmt.Sprintf("(FLOAT: %f)", floatLiteralExpr.Value)
+}
+
+type BoolLiteralExpr struct {
+	Value bool
+	Pos   position.SEPos
+}
+
+func NewBoolLiteralExpr(value bool, pos position.SEPos) *BoolLiteralExpr {
+	return &BoolLiteralExpr{
+		Value: value,
+		Pos:   pos,
+	}
+}
+
+func (boolLiteralExpr BoolLiteralExpr) Accept(visitor ExprVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return visitor.VisitBoolLiteralExpr(boolLiteralExpr, env)
+}
+
+func (boolLiteralExpr BoolLiteralExpr) ToString() string {
+	return fmt.Sprintf("(BOOL: %t)", boolLiteralExpr.Value)
 }

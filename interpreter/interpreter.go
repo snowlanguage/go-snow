@@ -121,3 +121,7 @@ func (interpreter *Interpreter) VisitIntLiteralExpr(expr parsevals.IntLiteralExp
 func (interpreter *Interpreter) VisitFloatLiteralExpr(expr parsevals.FloatLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
 	return runtimevalues.NewRTFloat(expr.Pos, expr.Value, env), nil
 }
+
+func (interpreter *Interpreter) VisitBoolLiteralExpr(expr parsevals.BoolLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return runtimevalues.NewRTBool(expr.Pos, expr.Value, env), nil
+}
