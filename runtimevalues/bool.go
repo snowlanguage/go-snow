@@ -142,3 +142,7 @@ func (rTBool *RTBool) LessThanEquals(other RTValue, position position.SEPos) (RT
 		rTBool.Environment,
 	)
 }
+
+func (rTBool *RTBool) Not(position position.SEPos) (RTValue, error) {
+	return NewRTBool(position, !rTBool.Value, rTBool.Environment), nil
+}

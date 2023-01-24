@@ -114,6 +114,37 @@ func (interpreter *Interpreter) VisitBinaryExpr(expr parsevals.BinaryExpr, env *
 	}
 }
 
+func (interpreter *Interpreter) VisitUnaryExpr(expr parsevals.UnaryExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	right, err := interpreter.evaluate(expr.Right, interpreter.environment)
+	if err != nil {
+		return nil, err
+	}
+
+	if expr.Tok.TType == token.DASH {
+		val, err := right.Multiply(runtimevalues.NewRTInt(expr.Pos, -1, env), expr.Pos)
+		if err != nil {
+			return nil, err
+		}
+
+		return val, nil
+	} else if expr.Tok.TType == token.NOT {
+		val, err := right.Not(expr.Pos)
+		if err != nil {
+			return nil, err
+		}
+
+		return val, nil
+	}
+
+	return nil, runtimevalues.NewRuntimeError(
+		snowerror.INVALID_OP_TOKEN_ERROR,
+		fmt.Sprintf("the op token of type '%s' is invalid for unary expressions", expr.Tok.TType),
+		"",
+		expr.Pos,
+		env,
+	)
+}
+
 func (interpreter *Interpreter) VisitIntLiteralExpr(expr parsevals.IntLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
 	return runtimevalues.NewRTInt(expr.Pos, expr.Value, env), nil
 }

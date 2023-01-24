@@ -225,6 +225,23 @@ func (parser *Parser) factor() (parsevals.Expr, error) {
 }
 
 func (parser *Parser) unary() (parsevals.Expr, error) {
+	if parser.currentToken.TType == token.DASH || parser.currentToken.TType == token.NOT {
+		token := parser.currentToken
+
+		parser.advance()
+
+		right, err := parser.unary()
+		if err != nil {
+			return nil, err
+		}
+
+		return parsevals.NewUnaryExpr(
+			token,
+			right,
+			*token.Pos.Start.CreateSEPos(parser.currentToken.Pos.End, parser.currentToken.Pos.File),
+		), nil
+	}
+
 	call, err := parser.call()
 	if err != nil {
 		return nil, err

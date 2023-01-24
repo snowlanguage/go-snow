@@ -207,3 +207,11 @@ func (rTInt *RTInt) LessThanEquals(other RTValue, position position.SEPos) (RTVa
 		rTInt.Environment,
 	)
 }
+
+func (rTInt *RTInt) Not(position position.SEPos) (RTValue, error) {
+	if rTInt.Value == 0 {
+		return NewRTBool(position, true, rTInt.Environment), nil
+	}
+
+	return NewRTBool(position, false, rTInt.Environment), nil
+}

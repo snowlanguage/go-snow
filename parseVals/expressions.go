@@ -15,6 +15,7 @@ type Expr interface {
 
 type ExprVisitor interface {
 	VisitBinaryExpr(expr BinaryExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
+	VisitUnaryExpr(expr UnaryExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitIntLiteralExpr(expr IntLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitFloatLiteralExpr(expr FloatLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitBoolLiteralExpr(expr BoolLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
@@ -42,6 +43,28 @@ func (binaryExpr BinaryExpr) Accept(visitor ExprVisitor, env *runtimevalues.Envi
 
 func (binaryExpr BinaryExpr) ToString() string {
 	return fmt.Sprintf("(%s %s %s)", binaryExpr.Left.ToString(), binaryExpr.Tok.ToString(), binaryExpr.Right.ToString())
+}
+
+type UnaryExpr struct {
+	Tok   token.Token
+	Right Expr
+	Pos   position.SEPos
+}
+
+func NewUnaryExpr(tok token.Token, right Expr, pos position.SEPos) *UnaryExpr {
+	return &UnaryExpr{
+		Right: right,
+		Tok:   tok,
+		Pos:   pos,
+	}
+}
+
+func (unaryExpr UnaryExpr) Accept(visitor ExprVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return visitor.VisitUnaryExpr(unaryExpr, env)
+}
+
+func (unaryExpr UnaryExpr) ToString() string {
+	return fmt.Sprintf("(%s %s)", unaryExpr.Tok.ToString(), unaryExpr.Right.ToString())
 }
 
 type IntLiteralExpr struct {

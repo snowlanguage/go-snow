@@ -206,3 +206,11 @@ func (rTFloat *RTFloat) LessThanEquals(other RTValue, position position.SEPos) (
 		rTFloat.Environment,
 	)
 }
+
+func (rTFloat *RTFloat) Not(position position.SEPos) (RTValue, error) {
+	if rTFloat.Value == 0 {
+		return NewRTBool(position, true, rTFloat.Environment), nil
+	}
+
+	return NewRTBool(position, false, rTFloat.Environment), nil
+}
