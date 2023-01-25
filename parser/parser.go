@@ -64,8 +64,6 @@ func (parser *Parser) binary(t1 token.TokenType, t2 token.TokenType, t3 token.To
 		opToken := parser.currentToken
 		parser.advance()
 
-		endPos := parser.currentToken.Pos
-
 		right, err := function()
 		if err != nil {
 			return nil, err
@@ -75,7 +73,7 @@ func (parser *Parser) binary(t1 token.TokenType, t2 token.TokenType, t3 token.To
 			left,
 			right,
 			opToken,
-			*startPos.CreateSEPos(endPos.End, parser.currentToken.Pos.File),
+			*startPos.CreateSEPos(right.GetPosition().End, parser.currentToken.Pos.File),
 		)
 	}
 
@@ -282,7 +280,7 @@ func (parser *Parser) unary() (parsevals.Expr, error) {
 		return parsevals.NewUnaryExpr(
 			token,
 			right,
-			*token.Pos.Start.CreateSEPos(parser.currentToken.Pos.End, parser.currentToken.Pos.File),
+			*token.Pos.Start.CreateSEPos(right.GetPosition().End, parser.currentToken.Pos.File),
 		), nil
 	}
 
@@ -355,7 +353,9 @@ func (parser *Parser) primary() (parsevals.Expr, error) {
 
 		parser.consume(token.RPAREN)
 
-		return parsevals.NewGroupingExpr(expr, *startToken.Pos.Start.CreateSEPos(endPos, startToken.Pos.File)), nil
+		pos := startToken.Pos.Start.CreateSEPos(endPos, startToken.Pos.File)
+
+		return parsevals.NewGroupingExpr(expr, *pos), nil
 	default:
 		err := snowerror.NewSnowError(
 			snowerror.INVALID_TOKEN_TYPE_ERROR,

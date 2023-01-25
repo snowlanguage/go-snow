@@ -11,6 +11,7 @@ import (
 type Expr interface {
 	Accept(visitor ExprVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	ToString() string
+	GetPosition() position.SEPos
 }
 
 type ExprVisitor interface {
@@ -46,6 +47,10 @@ func (binaryExpr BinaryExpr) ToString() string {
 	return fmt.Sprintf("(%s %s %s)", binaryExpr.Left.ToString(), binaryExpr.Tok.ToString(), binaryExpr.Right.ToString())
 }
 
+func (binaryExpr BinaryExpr) GetPosition() position.SEPos {
+	return binaryExpr.Pos
+}
+
 type UnaryExpr struct {
 	Tok   token.Token
 	Right Expr
@@ -68,6 +73,10 @@ func (unaryExpr UnaryExpr) ToString() string {
 	return fmt.Sprintf("(%s %s)", unaryExpr.Tok.ToString(), unaryExpr.Right.ToString())
 }
 
+func (unaryExpr UnaryExpr) GetPosition() position.SEPos {
+	return unaryExpr.Pos
+}
+
 type GroupingExpr struct {
 	Expression Expr
 	Pos        position.SEPos
@@ -86,6 +95,10 @@ func (groupingExpr GroupingExpr) Accept(visitor ExprVisitor, env *runtimevalues.
 
 func (groupingExpr GroupingExpr) ToString() string {
 	return fmt.Sprintf("(%s)", groupingExpr.Expression.ToString())
+}
+
+func (groupingExpr GroupingExpr) GetPosition() position.SEPos {
+	return groupingExpr.Pos
 }
 
 type IntLiteralExpr struct {
@@ -108,6 +121,10 @@ func (intLiteralExpr IntLiteralExpr) ToString() string {
 	return fmt.Sprintf("(INT: %d)", intLiteralExpr.Value)
 }
 
+func (intLiteralExpr IntLiteralExpr) GetPosition() position.SEPos {
+	return intLiteralExpr.Pos
+}
+
 type FloatLiteralExpr struct {
 	Value float64
 	Pos   position.SEPos
@@ -128,6 +145,10 @@ func (floatLiteralExpr FloatLiteralExpr) ToString() string {
 	return fmt.Sprintf("(FLOAT: %f)", floatLiteralExpr.Value)
 }
 
+func (floatLiteralExpr FloatLiteralExpr) GetPosition() position.SEPos {
+	return floatLiteralExpr.Pos
+}
+
 type BoolLiteralExpr struct {
 	Value bool
 	Pos   position.SEPos
@@ -146,4 +167,8 @@ func (boolLiteralExpr BoolLiteralExpr) Accept(visitor ExprVisitor, env *runtimev
 
 func (boolLiteralExpr BoolLiteralExpr) ToString() string {
 	return fmt.Sprintf("(BOOL: %t)", boolLiteralExpr.Value)
+}
+
+func (boolLiteralExpr BoolLiteralExpr) GetPosition() position.SEPos {
+	return boolLiteralExpr.Pos
 }
