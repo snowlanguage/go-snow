@@ -27,6 +27,8 @@ const (
 	NOT   TokenType = "NOT"
 	TRUE  TokenType = "TRUE"
 	FALSE TokenType = "FALSE"
+	VAR   TokenType = "VAR"
+	CONST TokenType = "CONST"
 
 	NEWLINE TokenType = "NEWLINE"
 

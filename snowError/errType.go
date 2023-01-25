@@ -14,4 +14,6 @@ const (
 	TOO_BIG_VALUE_ERROR               SnowErrType = "Too big value error"
 	VALUE_ERROR                       SnowErrType = "Value error"
 	DIVISION_BY_ZERO_ERROR            SnowErrType = "Division by zero error"
+	UNEXPECTED_TOKEN_ERROR            SnowErrType = "Unexpected token error"
+	VARIABLE_ALREADY_DECLARED_ERROR   SnowErrType = "Unexpected token error"
 )

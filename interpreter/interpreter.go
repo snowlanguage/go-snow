@@ -72,6 +72,25 @@ func (interpreter *Interpreter) VisitExpressionStmt(stmt parsevals.ExpressionStm
 	return value, nil
 }
 
+func (interpreter *Interpreter) VisitVarDeclStmt(stmt parsevals.VarDeclStmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	value, err := interpreter.evaluate(stmt.Expression, env)
+	if err != nil {
+		return nil, err
+	}
+
+	err = env.Declare(
+		stmt.VarType.TType == token.CONST,
+		stmt.Identifier.Value,
+		value,
+		stmt.Pos,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return value, nil
+}
+
 func (interpreter *Interpreter) VisitBinaryExpr(expr parsevals.BinaryExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
 	left, err := interpreter.evaluate(expr.Left, env)
 	if err != nil {

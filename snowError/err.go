@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/snowlanguage/go-snow/position"
+	"github.com/snowlanguage/go-snow/token"
 )
 
 type SnowError struct {
@@ -34,4 +35,13 @@ func (err SnowError) Error() string {
 	add := len(strconv.Itoa(err.Pos.Start.Ln+1)) + 3
 	arrows := strings.Repeat(" ", err.Pos.Start.Col+add) + strings.Repeat("^", err.Pos.End.Col-err.Pos.Start.Col+1)
 	return fmt.Sprintf("\033[31m%s\033[0m: %s\n%s%d | %s\n%s", err.ErrType, err.Msg, tip, err.Pos.Start.Ln, codeAtLine, arrows)
+}
+
+func NewUnexpectedTokenError(expected token.TokenType, got token.Token) *SnowError {
+	return NewSnowError(
+		UNEXPECTED_TOKEN_ERROR,
+		fmt.Sprintf("expected token of type '%s', but instead got token of type '%s'", expected, got.TType),
+		"",
+		got.Pos,
+	)
 }

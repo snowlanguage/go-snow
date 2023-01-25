@@ -19,6 +19,8 @@ func logErrors(errors []error) {
 			return
 		}
 
+		fmt.Println(err)
+
 		fmt.Println(err.Error())
 	}
 }

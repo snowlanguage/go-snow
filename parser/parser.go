@@ -33,7 +33,6 @@ func (parser *Parser) advance() {
 }
 
 func (parser *Parser) consume(tType token.TokenType) error {
-	fmt.Println(parser.currentToken.TType != token.EOF, parser.currentToken.TType)
 	if parser.currentToken.TType != tType && parser.currentToken.TType != token.EOF {
 		pos := parser.currentToken.Pos
 		tType2 := parser.currentToken.TType
@@ -101,12 +100,49 @@ func (parser *Parser) Parse() ([]parsevals.Stmt, error) {
 }
 
 func (parser *Parser) deceleration() (parsevals.Stmt, error) {
+	if parser.currentToken.TType == token.VAR || parser.currentToken.TType == token.CONST {
+		varDeclStmt, err := parser.varDeclStmt()
+		if err != nil {
+			return nil, err
+		}
+
+		return varDeclStmt, nil
+	}
+
 	statement, err := parser.statement()
 	if err != nil {
 		return nil, err
 	}
 
 	return statement, nil
+}
+
+func (parser *Parser) varDeclStmt() (parsevals.Stmt, error) {
+	startTok := parser.currentToken
+
+	parser.advance()
+
+	if parser.currentToken.TType != token.IDENTIFIER {
+		return nil, snowerror.NewUnexpectedTokenError(token.IDENTIFIER, parser.currentToken)
+	}
+
+	identifier := parser.currentToken
+
+	parser.advance()
+
+	err := parser.consume(token.SINGLE_EQUALS)
+	if err != nil {
+		return nil, err
+	}
+
+	endPos := parser.currentToken.Pos.End
+
+	expr, err := parser.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	return parsevals.NewVarDeclStmt(startTok, identifier, expr, *startTok.Pos.Start.CreateSEPos(endPos, startTok.Pos.File)), nil
 }
 
 func (parser *Parser) statement() (parsevals.Stmt, error) {
@@ -119,6 +155,8 @@ func (parser *Parser) statement() (parsevals.Stmt, error) {
 }
 
 func (parser *Parser) expressionStmt() (parsevals.Stmt, error) {
+	pos := parser.currentToken.Pos
+
 	expression, err := parser.expression()
 	if err != nil {
 		return nil, err
@@ -131,7 +169,7 @@ func (parser *Parser) expressionStmt() (parsevals.Stmt, error) {
 		}
 	}
 
-	return parsevals.NewExpressionStmt(expression), nil
+	return parsevals.NewExpressionStmt(expression, pos), nil
 }
 
 func (parser *Parser) expression() (parsevals.Expr, error) {
@@ -314,8 +352,6 @@ func (parser *Parser) primary() (parsevals.Expr, error) {
 		}
 
 		endPos := parser.currentToken.Pos.End
-
-		fmt.Println(parser.currentToken)
 
 		parser.consume(token.RPAREN)
 
