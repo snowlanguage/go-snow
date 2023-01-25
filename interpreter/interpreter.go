@@ -145,6 +145,15 @@ func (interpreter *Interpreter) VisitUnaryExpr(expr parsevals.UnaryExpr, env *ru
 	)
 }
 
+func (interpreter *Interpreter) VisitGroupingExpr(expr parsevals.GroupingExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	val, err := interpreter.evaluate(expr.Expression, env)
+	if err != nil {
+		return nil, err
+	}
+
+	return val, nil
+}
+
 func (interpreter *Interpreter) VisitIntLiteralExpr(expr parsevals.IntLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
 	return runtimevalues.NewRTInt(expr.Pos, expr.Value, env), nil
 }

@@ -16,6 +16,7 @@ type Expr interface {
 type ExprVisitor interface {
 	VisitBinaryExpr(expr BinaryExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitUnaryExpr(expr UnaryExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
+	VisitGroupingExpr(expr GroupingExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitIntLiteralExpr(expr IntLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitFloatLiteralExpr(expr FloatLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitBoolLiteralExpr(expr BoolLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
@@ -65,6 +66,26 @@ func (unaryExpr UnaryExpr) Accept(visitor ExprVisitor, env *runtimevalues.Enviro
 
 func (unaryExpr UnaryExpr) ToString() string {
 	return fmt.Sprintf("(%s %s)", unaryExpr.Tok.ToString(), unaryExpr.Right.ToString())
+}
+
+type GroupingExpr struct {
+	Expression Expr
+	Pos        position.SEPos
+}
+
+func NewGroupingExpr(expression Expr, pos position.SEPos) *GroupingExpr {
+	return &GroupingExpr{
+		Expression: expression,
+		Pos:        pos,
+	}
+}
+
+func (groupingExpr GroupingExpr) Accept(visitor ExprVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return visitor.VisitGroupingExpr(groupingExpr, env)
+}
+
+func (groupingExpr GroupingExpr) ToString() string {
+	return fmt.Sprintf("(%s)", groupingExpr.Expression.ToString())
 }
 
 type IntLiteralExpr struct {

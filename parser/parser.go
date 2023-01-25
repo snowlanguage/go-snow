@@ -33,14 +33,22 @@ func (parser *Parser) advance() {
 }
 
 func (parser *Parser) consume(tType token.TokenType) error {
-	if parser.currentToken.TType != tType {
+	fmt.Println(parser.currentToken.TType != token.EOF, parser.currentToken.TType)
+	if parser.currentToken.TType != tType && parser.currentToken.TType != token.EOF {
+		pos := parser.currentToken.Pos
+		tType2 := parser.currentToken.TType
+
+		parser.advance()
+
 		return snowerror.NewSnowError(
 			snowerror.EXPECTED_TOKEN_ERROR,
-			fmt.Sprintf("expected token of type '%s', not token of type '%s'", tType, parser.currentToken.TType),
+			fmt.Sprintf("expected token of type '%s', not token of type '%s'", tType, tType2),
 			"",
-			parser.currentToken.Pos,
+			pos,
 		)
 	}
+
+	parser.advance()
 
 	return nil
 }
@@ -297,6 +305,21 @@ func (parser *Parser) primary() (parsevals.Expr, error) {
 		parser.advance()
 
 		return parsevals.NewBoolLiteralExpr(false, startToken.Pos), nil
+	case token.LPAREN:
+		parser.advance()
+
+		expr, err := parser.expression()
+		if err != nil {
+			return nil, err
+		}
+
+		endPos := parser.currentToken.Pos.End
+
+		fmt.Println(parser.currentToken)
+
+		parser.consume(token.RPAREN)
+
+		return parsevals.NewGroupingExpr(expr, *startToken.Pos.Start.CreateSEPos(endPos, startToken.Pos.File)), nil
 	default:
 		err := snowerror.NewSnowError(
 			snowerror.INVALID_TOKEN_TYPE_ERROR,
