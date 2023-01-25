@@ -31,10 +31,14 @@ func runFile(file string) {
 
 	env := runtimevalues.NewEnvironment(nil, file, 1)
 
-	_, errors := run(file, string(code), env)
+	vals, errors := run(file, string(code), env)
 
 	if len(errors) != 0 {
 		logErrors(errors)
+	}
+
+	for _, val := range vals {
+		fmt.Println(val.ValueToString())
 	}
 }
 
