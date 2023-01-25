@@ -96,6 +96,10 @@ func run(filename string, code string, e *runtimevalues.Environment) ([]runtimev
 		return nil, errArray
 	}
 
+	// for _, stmt := range s {
+	// 	fmt.Println("parser", stmt.ToString())
+	// }
+
 	i := interpreter.NewInterpreter(s, f, e)
 
 	// fmt.Println("Interpreting")

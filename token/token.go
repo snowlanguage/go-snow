@@ -55,7 +55,7 @@ func (token *Token) ToString() string {
 	case FLOAT:
 		str = fmt.Sprintf("(FLOAT: %s)", token.Value)
 	case STRING:
-		str = fmt.Sprintf("(STRING: %s)", token.Value)
+		str = fmt.Sprintf("(STRING: \"%s\")", token.Value)
 	case IDENTIFIER:
 		str = fmt.Sprintf("(IDENTIFIER: %s)", token.Value)
 	default:

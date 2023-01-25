@@ -116,8 +116,6 @@ func (parser *Parser) expressionStmt() (parsevals.Stmt, error) {
 		return nil, err
 	}
 
-	parser.advance()
-
 	if parser.currentToken.TType != token.EOF {
 		err = parser.consume(token.NEWLINE)
 		if err != nil {
