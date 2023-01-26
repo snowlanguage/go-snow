@@ -21,6 +21,7 @@ type ExprVisitor interface {
 	VisitIntLiteralExpr(expr IntLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitFloatLiteralExpr(expr FloatLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitBoolLiteralExpr(expr BoolLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
+	VisitVarAccessExpr(expr VarAccessExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 }
 
 type BinaryExpr struct {
@@ -171,4 +172,30 @@ func (boolLiteralExpr BoolLiteralExpr) ToString() string {
 
 func (boolLiteralExpr BoolLiteralExpr) GetPosition() position.SEPos {
 	return boolLiteralExpr.Pos
+}
+
+// TODO: ADD VAR ACCESS EXPR
+
+type VarAccessExpr struct {
+	Value string
+	Pos   position.SEPos
+}
+
+func NewVarAccessExpr(value string, pos position.SEPos) *VarAccessExpr {
+	return &VarAccessExpr{
+		Value: value,
+		Pos:   pos,
+	}
+}
+
+func (varAccessExpr VarAccessExpr) Accept(visitor ExprVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return visitor.VisitVarAccessExpr(varAccessExpr, env)
+}
+
+func (varAccessExpr VarAccessExpr) ToString() string {
+	return fmt.Sprintf("(VAR_ACCESS: %s)", varAccessExpr.Value)
+}
+
+func (varAccessExpr VarAccessExpr) GetPosition() position.SEPos {
+	return varAccessExpr.Pos
 }

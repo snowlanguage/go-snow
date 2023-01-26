@@ -356,6 +356,10 @@ func (parser *Parser) primary() (parsevals.Expr, error) {
 		pos := startToken.Pos.Start.CreateSEPos(endPos, startToken.Pos.File)
 
 		return parsevals.NewGroupingExpr(expr, *pos), nil
+	case token.IDENTIFIER:
+		parser.advance()
+
+		return parsevals.NewVarAccessExpr(startToken.Value, startToken.Pos), nil
 	default:
 		err := snowerror.NewSnowError(
 			snowerror.INVALID_TOKEN_TYPE_ERROR,

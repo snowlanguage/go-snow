@@ -184,3 +184,12 @@ func (interpreter *Interpreter) VisitFloatLiteralExpr(expr parsevals.FloatLitera
 func (interpreter *Interpreter) VisitBoolLiteralExpr(expr parsevals.BoolLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
 	return runtimevalues.NewRTBool(expr.Pos, expr.Value, env), nil
 }
+
+func (interpreter *Interpreter) VisitVarAccessExpr(expr parsevals.VarAccessExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	val, err := env.Get(expr.Value, expr.Pos)
+	if err != nil {
+		return nil, err
+	}
+
+	return val, nil
+}

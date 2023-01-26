@@ -33,7 +33,7 @@ func (environment *Environment) Declare(constant bool, name string, value RTValu
 	if v, ok := environment.vars[name]; ok {
 		return NewRuntimeError(
 			snowerror.VARIABLE_ALREADY_DECLARED_ERROR,
-			fmt.Sprintf("a variable with the name '%s' has already declared on line %d", name, v.DeclarationPos.Start.Ln),
+			fmt.Sprintf("a variable with the name of '%s' has already declared on line %d", name, v.DeclarationPos.Start.Ln),
 			"",
 			pos,
 			environment,
@@ -47,4 +47,22 @@ func (environment *Environment) Declare(constant bool, name string, value RTValu
 	}
 
 	return nil
+}
+
+func (environment *Environment) Get(name string, pos position.SEPos) (RTValue, error) {
+	if _, ok := environment.vars[name]; !ok {
+		if environment.Parent != nil {
+			return environment.Parent.Get(name, pos)
+		}
+
+		return nil, NewRuntimeError(
+			snowerror.UNDEFINED_VARIABLE_ERROR,
+			fmt.Sprintf("a variable with the name of '%s' could not be found", name),
+			"",
+			pos,
+			environment,
+		)
+	}
+
+	return environment.vars[name].Value, nil
 }
