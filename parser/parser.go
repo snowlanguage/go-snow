@@ -32,6 +32,14 @@ func (parser *Parser) advance() {
 	}
 }
 
+func (parser *Parser) peek() token.Token {
+	if parser.currentToken.TType != token.EOF {
+		return parser.tokens[parser.index+1]
+	}
+
+	return parser.currentToken
+}
+
 func (parser *Parser) consume(tType token.TokenType) error {
 	if parser.currentToken.TType != tType && parser.currentToken.TType != token.EOF {
 		pos := parser.currentToken.Pos
@@ -180,6 +188,27 @@ func (parser *Parser) expression() (parsevals.Expr, error) {
 }
 
 func (parser *Parser) assignment() (parsevals.Expr, error) {
+	if parser.currentToken.TType == token.IDENTIFIER && parser.peek().TType == token.SINGLE_EQUALS {
+		identifier := parser.currentToken
+
+		parser.advance()
+		err := parser.consume(token.SINGLE_EQUALS)
+		if err != nil {
+			return nil, err
+		}
+
+		val, err := parser.expression()
+		if err != nil {
+			return nil, err
+		}
+
+		return parsevals.NewVarAssignmentExpr(
+			identifier.Value,
+			val,
+			*identifier.Pos.Start.CreateSEPos(val.GetPosition().End, identifier.Pos.File),
+		), nil
+	}
+
 	logicOr, err := parser.logicOr()
 	if err != nil {
 		return nil, err
@@ -318,7 +347,7 @@ func (parser *Parser) primary() (parsevals.Expr, error) {
 			)
 		}
 
-		return parsevals.NewIntLiteralExpr(intValue, parser.currentToken.Pos), nil
+		return parsevals.NewIntLiteralExpr(intValue, startToken.Pos), nil
 	case token.FLOAT:
 		parser.advance()
 
@@ -332,7 +361,7 @@ func (parser *Parser) primary() (parsevals.Expr, error) {
 			)
 		}
 
-		return parsevals.NewFloatLiteralExpr(floatValue, parser.currentToken.Pos), nil
+		return parsevals.NewFloatLiteralExpr(floatValue, startToken.Pos), nil
 	case token.TRUE:
 		parser.advance()
 
@@ -363,7 +392,7 @@ func (parser *Parser) primary() (parsevals.Expr, error) {
 	default:
 		err := snowerror.NewSnowError(
 			snowerror.INVALID_TOKEN_TYPE_ERROR,
-			fmt.Sprintf("token of type '%s' is invalid", parser.currentToken.TType),
+			fmt.Sprintf("token of type '%s' is invalid", startToken.TType),
 			"",
 			parser.currentToken.Pos,
 		)

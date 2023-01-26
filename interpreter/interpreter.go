@@ -193,3 +193,12 @@ func (interpreter *Interpreter) VisitVarAccessExpr(expr parsevals.VarAccessExpr,
 
 	return val, nil
 }
+
+func (interpreter *Interpreter) VisitVarAssignmentExpr(expr parsevals.VarAssignmentExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	val, err := interpreter.evaluate(expr.Value, env)
+	if err != nil {
+		return nil, err
+	}
+
+	return env.Set(expr.Name, val, expr.Pos)
+}

@@ -22,6 +22,7 @@ type ExprVisitor interface {
 	VisitFloatLiteralExpr(expr FloatLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitBoolLiteralExpr(expr BoolLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitVarAccessExpr(expr VarAccessExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
+	VisitVarAssignmentExpr(expr VarAssignmentExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 }
 
 type BinaryExpr struct {
@@ -196,4 +197,30 @@ func (varAccessExpr VarAccessExpr) ToString() string {
 
 func (varAccessExpr VarAccessExpr) GetPosition() position.SEPos {
 	return varAccessExpr.Pos
+}
+
+type VarAssignmentExpr struct {
+	Name  string
+	Value Expr
+	Pos   position.SEPos
+}
+
+func NewVarAssignmentExpr(name string, value Expr, pos position.SEPos) *VarAssignmentExpr {
+	return &VarAssignmentExpr{
+		Name:  name,
+		Value: value,
+		Pos:   pos,
+	}
+}
+
+func (varAssignmentExpr VarAssignmentExpr) Accept(visitor ExprVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return visitor.VisitVarAssignmentExpr(varAssignmentExpr, env)
+}
+
+func (varAssignmentExpr VarAssignmentExpr) ToString() string {
+	return fmt.Sprintf("(VAR_ASSIGNMENT_EXPR: %s = %s)", varAssignmentExpr.Name, varAssignmentExpr.Value.ToString())
+}
+
+func (varAssignmentExpr VarAssignmentExpr) GetPosition() position.SEPos {
+	return varAssignmentExpr.Pos
 }

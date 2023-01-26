@@ -66,3 +66,40 @@ func (environment *Environment) Get(name string, pos position.SEPos) (RTValue, e
 
 	return environment.vars[name].Value, nil
 }
+
+func (environment *Environment) Set(name string, value RTValue, pos position.SEPos) (RTValue, error) {
+	if _, ok := environment.vars[name]; !ok {
+		if environment.Parent != nil {
+			return environment.Parent.Get(name, pos)
+		}
+
+		return nil, NewRuntimeError(
+			snowerror.UNDEFINED_VARIABLE_ERROR,
+			fmt.Sprintf("a variable with the name of '%s' could not be found", name),
+			"",
+			pos,
+			environment,
+		)
+	}
+
+	v := environment.vars[name]
+	if v.Constant {
+		return nil, NewRuntimeError(
+			snowerror.CONSTANT_VARIABLE_ASSIGNMENT_ERROR,
+			fmt.Sprintf("the variable '%s' is a constant and can therefor not be assigned to", name),
+			name,
+			pos,
+			environment,
+		)
+	}
+
+	newVar := variable{
+		Value:          value,
+		Constant:       false,
+		DeclarationPos: v.DeclarationPos,
+	}
+
+	environment.vars[name] = newVar
+
+	return value, nil
+}
