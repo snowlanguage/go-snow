@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/snowlanguage/go-snow/file"
@@ -43,13 +44,19 @@ func runFile(file string) {
 }
 
 func runRepl() {
-	input := bufio.NewScanner(os.Stdin)
+	input := bufio.NewReader(os.Stdin)
 
 	env := runtimevalues.NewEnvironment(nil, "<repl>", 1)
 
+	code := "a"
 	fmt.Print("> ")
-	for input.Scan() {
-		code := input.Text()
+	for code != "" {
+		codeByte, _, err := input.ReadLine()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		code = string(codeByte)
 
 		if code == "" {
 			continue

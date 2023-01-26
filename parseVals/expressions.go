@@ -174,8 +174,6 @@ func (boolLiteralExpr BoolLiteralExpr) GetPosition() position.SEPos {
 	return boolLiteralExpr.Pos
 }
 
-// TODO: ADD VAR ACCESS EXPR
-
 type VarAccessExpr struct {
 	Value string
 	Pos   position.SEPos
