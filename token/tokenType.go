@@ -8,8 +8,10 @@ const (
 	STAR  TokenType = "STAR"
 	SLASH TokenType = "SLASH"
 
-	LPAREN TokenType = "LPAREN"
-	RPAREN TokenType = "RPAREN"
+	LPAREN        TokenType = "LPAREN"
+	RPAREN        TokenType = "RPAREN"
+	LCURLYBRACKET TokenType = "LCURLYBRACKET"
+	RCURLYBRACKET TokenType = "RCURLYBRACKET"
 
 	SINGLE_EQUALS       TokenType = "SINGLE_EQUALS"
 	EQUALS              TokenType = "EQUALS"

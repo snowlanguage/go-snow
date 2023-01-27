@@ -17,15 +17,19 @@ type Environment struct {
 	Parent    *Environment
 	vars      map[string]variable
 	StartLine int
+	FileName  string
 	Name      string
+	IsFile    bool
 }
 
-func NewEnvironment(parent *Environment, name string, startLine int) *Environment {
+func NewEnvironment(parent *Environment, name string, startLine int, fileName string, isFile bool) *Environment {
 	return &Environment{
 		Parent:    parent,
 		vars:      make(map[string]variable, 0),
 		StartLine: startLine,
+		FileName:  fileName,
 		Name:      name,
+		IsFile:    isFile,
 	}
 }
 
@@ -49,10 +53,10 @@ func (environment *Environment) Declare(constant bool, name string, value RTValu
 	return nil
 }
 
-func (environment *Environment) Get(name string, pos position.SEPos) (RTValue, error) {
+func (environment *Environment) Get(name string, pos position.SEPos, env *Environment) (RTValue, error) {
 	if _, ok := environment.vars[name]; !ok {
 		if environment.Parent != nil {
-			return environment.Parent.Get(name, pos)
+			return environment.Parent.Get(name, pos, env)
 		}
 
 		return nil, NewRuntimeError(
@@ -60,17 +64,17 @@ func (environment *Environment) Get(name string, pos position.SEPos) (RTValue, e
 			fmt.Sprintf("a variable with the name of '%s' could not be found", name),
 			"",
 			pos,
-			environment,
+			env,
 		)
 	}
 
 	return environment.vars[name].Value, nil
 }
 
-func (environment *Environment) Set(name string, value RTValue, pos position.SEPos) (RTValue, error) {
+func (environment *Environment) Set(name string, value RTValue, env *Environment, pos position.SEPos) (RTValue, error) {
 	if _, ok := environment.vars[name]; !ok {
 		if environment.Parent != nil {
-			return environment.Parent.Get(name, pos)
+			return environment.Parent.Set(name, value, env, pos)
 		}
 
 		return nil, NewRuntimeError(
@@ -78,7 +82,7 @@ func (environment *Environment) Set(name string, value RTValue, pos position.SEP
 			fmt.Sprintf("a variable with the name of '%s' could not be found", name),
 			"",
 			pos,
-			environment,
+			env,
 		)
 	}
 

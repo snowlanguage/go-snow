@@ -36,6 +36,10 @@ func (token *Token) ToString() string {
 		str = "("
 	case RPAREN:
 		str = ")"
+	case LCURLYBRACKET:
+		str = "{"
+	case RCURLYBRACKET:
+		str = "}"
 	case EOF:
 		str = "(EOF)"
 	case SINGLE_EQUALS:

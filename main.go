@@ -30,7 +30,7 @@ func runFile(file string) {
 		panic(err)
 	}
 
-	env := runtimevalues.NewEnvironment(nil, file, 1)
+	env := runtimevalues.NewEnvironment(nil, file, 1, file, true)
 
 	vals, errors := run(file, string(code), env)
 
@@ -46,7 +46,7 @@ func runFile(file string) {
 func runRepl() {
 	input := bufio.NewReader(os.Stdin)
 
-	env := runtimevalues.NewEnvironment(nil, "<repl>", 1)
+	env := runtimevalues.NewEnvironment(nil, "<repl>", 1, "<repl>", true)
 
 	code := "a"
 	fmt.Print("> ")
@@ -84,7 +84,7 @@ func run(filename string, code string, e *runtimevalues.Environment) ([]runtimev
 	f := file.NewFile(filename, code)
 	l := lexer.NewLexer(f)
 
-	// fmt.Println("Tokenizing")
+	fmt.Println("Tokenizing")
 
 	t, err := l.Tokenize()
 
@@ -92,13 +92,13 @@ func run(filename string, code string, e *runtimevalues.Environment) ([]runtimev
 		return nil, err
 	}
 
-	for _, tok := range t {
-		fmt.Println("token", tok.ToString())
-	}
+	// for _, tok := range t {
+	// 	fmt.Println("token", tok.ToString())
+	// }
 
 	p := parser.NewParser(t, f)
 
-	// fmt.Println("Parsing")
+	fmt.Println("Parsing")
 
 	s, err2 := p.Parse()
 
@@ -107,13 +107,13 @@ func run(filename string, code string, e *runtimevalues.Environment) ([]runtimev
 		return nil, errArray
 	}
 
-	for _, stmt := range s {
-		fmt.Println("parser", stmt.ToString())
-	}
+	// for _, stmt := range s {
+	// 	fmt.Println("parser", stmt.ToString())
+	// }
 
 	i := interpreter.NewInterpreter(s, f, e)
 
-	// fmt.Println("Interpreting")
+	fmt.Println("Interpreting")
 
 	v, err3 := i.Interpret()
 

@@ -88,6 +88,7 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 		case ' ':
 			lexer.advance()
 		case '\t':
+			lexer.pos.Col += 2
 			lexer.advance()
 		case '#':
 			_, err := lexer.makeComment()
@@ -114,6 +115,12 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 			lexer.advance()
 		case ')':
 			tokens = append(tokens, *lexer.createSimpleToken(token.RPAREN))
+			lexer.advance()
+		case '{':
+			tokens = append(tokens, *lexer.createSimpleToken(token.LCURLYBRACKET))
+			lexer.advance()
+		case '}':
+			tokens = append(tokens, *lexer.createSimpleToken(token.RCURLYBRACKET))
 			lexer.advance()
 		case '=':
 			if !lexer.end && lexer.peek() == '=' {

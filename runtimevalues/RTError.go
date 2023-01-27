@@ -2,6 +2,8 @@ package runtimevalues
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 
 	"github.com/snowlanguage/go-snow/position"
 	snowerror "github.com/snowlanguage/go-snow/snowError"
@@ -11,6 +13,38 @@ import (
 type RTError struct {
 	snowerror.SnowError
 	environment *Environment
+}
+
+func (rTError RTError) Error() string {
+	tip := rTError.Tip
+	if tip != "" {
+		tip = tip + "\n"
+	}
+
+	stack := make([]string, 0)
+	env := rTError.environment
+	for env != nil {
+		name := "anonymous block"
+		if env.Name != "" {
+			name = fmt.Sprintf("'%s'", env.Name)
+		}
+
+		if env.IsFile {
+			stack = append(stack, fmt.Sprintf("In file '%s'", env.FileName))
+		} else {
+			stack = append(stack, fmt.Sprintf("In %s starting at line %d in file '%s'", name, env.StartLine, env.FileName))
+		}
+		env = env.Parent
+	}
+
+	for i, j := 0, len(stack)-1; i < j; i, j = i+1, j-1 {
+		stack[i], stack[j] = stack[j], stack[i]
+	}
+
+	codeAtLine := strings.ReplaceAll(strings.Split(rTError.Pos.File.Code, "\n")[rTError.Pos.Start.Ln-1], "\t", "   ")
+	add := len(strconv.Itoa(rTError.Pos.Start.Ln+1)) + 3
+	arrows := strings.Repeat(" ", rTError.Pos.Start.Col+add) + strings.Repeat("^", rTError.Pos.End.Col-rTError.Pos.Start.Col+1)
+	return fmt.Sprintf("Stack with most recent last:\n%s\n\033[31m%s\033[0m: %s\n%s%d | %s\n%s", strings.Join(stack, "\n"), rTError.ErrType, rTError.Msg, tip, rTError.Pos.Start.Ln, codeAtLine, arrows)
 }
 
 func NewRuntimeError(errType snowerror.SnowErrType, msg string, tip string, pos position.SEPos, env *Environment) *RTError {

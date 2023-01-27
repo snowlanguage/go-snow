@@ -15,6 +15,7 @@ type Parser struct {
 	file         *file.File
 	currentToken token.Token
 	index        int
+	inBlock      int
 }
 
 func NewParser(tokens []token.Token, file *file.File) *Parser {
@@ -94,6 +95,12 @@ func (parser *Parser) Parse() ([]parsevals.Stmt, error) {
 	parser.advance()
 
 	for parser.currentToken.TType != token.EOF {
+		if parser.currentToken.TType == token.NEWLINE {
+			parser.advance()
+
+			continue
+		}
+
 		stmt, err := parser.deceleration()
 		if err != nil {
 			return nil, err
@@ -106,6 +113,10 @@ func (parser *Parser) Parse() ([]parsevals.Stmt, error) {
 }
 
 func (parser *Parser) deceleration() (parsevals.Stmt, error) {
+	if parser.currentToken.TType == token.NEWLINE {
+		return nil, nil
+	}
+
 	if parser.currentToken.TType == token.VAR || parser.currentToken.TType == token.CONST {
 		varDeclStmt, err := parser.varDeclStmt()
 		if err != nil {
@@ -141,23 +152,69 @@ func (parser *Parser) varDeclStmt() (parsevals.Stmt, error) {
 		return nil, err
 	}
 
-	endPos := parser.currentToken.Pos.End
-
 	expr, err := parser.expression()
 	if err != nil {
 		return nil, err
 	}
 
-	return parsevals.NewVarDeclStmt(startTok, identifier, expr, *startTok.Pos.Start.CreateSEPos(endPos, startTok.Pos.File)), nil
+	parser.consume(token.NEWLINE)
+
+	return parsevals.NewVarDeclStmt(startTok, identifier, expr, *startTok.Pos.Start.CreateSEPos(expr.GetPosition().End, startTok.Pos.File)), nil
 }
 
 func (parser *Parser) statement() (parsevals.Stmt, error) {
+	if parser.currentToken.TType == token.LCURLYBRACKET {
+		return parser.blockStatement()
+	}
+
 	statement, err := parser.expressionStmt()
 	if err != nil {
 		return nil, err
 	}
 
 	return statement, nil
+}
+
+func (parser *Parser) blockStatement(params ...string) (parsevals.Stmt, error) {
+	startPos := parser.currentToken.Pos.Start
+	file := parser.currentToken.Pos.File
+	statements := make([]parsevals.Stmt, 0)
+
+	parser.consume(token.LCURLYBRACKET)
+
+	for parser.currentToken.TType == token.NEWLINE {
+		parser.advance()
+	}
+
+	parser.inBlock += 1
+
+	for parser.currentToken.TType != token.RCURLYBRACKET && parser.currentToken.TType != token.EOF {
+		statement, err := parser.deceleration()
+		if err != nil {
+			return nil, err
+		}
+
+		statements = append(statements, statement)
+	}
+
+	parser.inBlock -= 1
+
+	if parser.currentToken.TType != token.RCURLYBRACKET {
+		return nil, snowerror.NewUnexpectedTokenError(token.RCURLYBRACKET, parser.currentToken)
+	}
+
+	parser.advance()
+
+	endPos := parser.currentToken.Pos
+
+	parser.advance()
+
+	name := ""
+	if len(params) != 0 {
+		name = params[0]
+	}
+
+	return parsevals.NewBlockStmt(statements, name, *startPos.CreateSEPos(endPos.End, file)), nil
 }
 
 func (parser *Parser) expressionStmt() (parsevals.Stmt, error) {
@@ -168,7 +225,7 @@ func (parser *Parser) expressionStmt() (parsevals.Stmt, error) {
 		return nil, err
 	}
 
-	if parser.currentToken.TType != token.EOF {
+	if parser.currentToken.TType != token.EOF && !(parser.inBlock != 0 && parser.currentToken.TType == token.RCURLYBRACKET) {
 		err = parser.consume(token.NEWLINE)
 		if err != nil {
 			return nil, err

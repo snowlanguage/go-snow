@@ -49,7 +49,9 @@ func (interpreter *Interpreter) Interpret() ([]runtimevalues.RTValue, error) {
 			return nil, err
 		}
 
-		values = append(values, value)
+		if value != nil {
+			values = append(values, value)
+		}
 	}
 
 	return values, nil
@@ -89,6 +91,19 @@ func (interpreter *Interpreter) VisitVarDeclStmt(stmt parsevals.VarDeclStmt, env
 	}
 
 	return value, nil
+}
+
+func (interpreter *Interpreter) VisitBlockStmt(stmt parsevals.BlockStmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	blockEnv := runtimevalues.NewEnvironment(env, stmt.Name, stmt.Pos.Start.Ln, stmt.Pos.File.Name, false)
+
+	for _, statement := range stmt.Statements {
+		_, err := interpreter.execute(statement, blockEnv)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return nil, nil
 }
 
 func (interpreter *Interpreter) VisitBinaryExpr(expr parsevals.BinaryExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
@@ -134,7 +149,7 @@ func (interpreter *Interpreter) VisitBinaryExpr(expr parsevals.BinaryExpr, env *
 }
 
 func (interpreter *Interpreter) VisitUnaryExpr(expr parsevals.UnaryExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
-	right, err := interpreter.evaluate(expr.Right, interpreter.environment)
+	right, err := interpreter.evaluate(expr.Right, env)
 	if err != nil {
 		return nil, err
 	}
@@ -186,7 +201,7 @@ func (interpreter *Interpreter) VisitBoolLiteralExpr(expr parsevals.BoolLiteralE
 }
 
 func (interpreter *Interpreter) VisitVarAccessExpr(expr parsevals.VarAccessExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
-	val, err := env.Get(expr.Value, expr.Pos)
+	val, err := env.Get(expr.Value, expr.Pos, env)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +216,7 @@ func (interpreter *Interpreter) VisitVarAssignmentExpr(expr parsevals.VarAssignm
 			return nil, err
 		}
 
-		return env.Set(expr.Name, val, expr.Pos)
+		return env.Set(expr.Name, val, env, expr.Pos)
 	} else {
 		left, err := interpreter.evaluate(expr.Object, env)
 		if err != nil {
