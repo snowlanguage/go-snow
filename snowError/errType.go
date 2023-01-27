@@ -18,4 +18,6 @@ const (
 	VARIABLE_ALREADY_DECLARED_ERROR    SnowErrType = "Unexpected token error"
 	UNDEFINED_VARIABLE_ERROR           SnowErrType = "Undefined variable error"
 	CONSTANT_VARIABLE_ASSIGNMENT_ERROR SnowErrType = "Constant variable assignment error"
+	INVALID_ATTRIBUTE_ERROR            SnowErrType = "Invalid attribute error"
+	UNABLE_TO_ASSIGN_ATTRIBUTE_ERROR   SnowErrType = "Unable to assign attribute error"
 )

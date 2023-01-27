@@ -41,6 +41,14 @@ func (rTFloat *RTFloat) GetEnvironment() *Environment {
 	return rTFloat.Environment
 }
 
+func (rTFloat *RTFloat) Dot(other token.Token, position position.SEPos) (RTValue, error) {
+	return nil, NewInvalidAttributeRTError(rTFloat, other, position, rTFloat.Environment)
+}
+
+func (rTFloat *RTFloat) SetAttribute(other string, value RTValue, position position.SEPos) (RTValue, error) {
+	return nil, NewUnableToAssignAttributeError(rTFloat, other, value, position, rTFloat.Environment)
+}
+
 func (rTFloat *RTFloat) Add(other RTValue, position position.SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_FLOAT:

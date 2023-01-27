@@ -41,6 +41,14 @@ func (rTInt *RTInt) GetEnvironment() *Environment {
 	return rTInt.Environment
 }
 
+func (rTInt *RTInt) Dot(other token.Token, position position.SEPos) (RTValue, error) {
+	return nil, NewInvalidAttributeRTError(rTInt, other, position, rTInt.Environment)
+}
+
+func (rTInt *RTInt) SetAttribute(other string, value RTValue, position position.SEPos) (RTValue, error) {
+	return nil, NewUnableToAssignAttributeError(rTInt, other, value, position, rTInt.Environment)
+}
+
 func (rTInt *RTInt) Add(other RTValue, position position.SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_INT:

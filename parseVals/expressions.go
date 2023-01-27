@@ -23,6 +23,7 @@ type ExprVisitor interface {
 	VisitBoolLiteralExpr(expr BoolLiteralExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitVarAccessExpr(expr VarAccessExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitVarAssignmentExpr(expr VarAssignmentExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
+	VisitDotExpr(expr DotExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 }
 
 type BinaryExpr struct {
@@ -200,16 +201,18 @@ func (varAccessExpr VarAccessExpr) GetPosition() position.SEPos {
 }
 
 type VarAssignmentExpr struct {
-	Name  string
-	Value Expr
-	Pos   position.SEPos
+	Object Expr
+	Name   string
+	Value  Expr
+	Pos    position.SEPos
 }
 
-func NewVarAssignmentExpr(name string, value Expr, pos position.SEPos) *VarAssignmentExpr {
+func NewVarAssignmentExpr(object Expr, name string, value Expr, pos position.SEPos) *VarAssignmentExpr {
 	return &VarAssignmentExpr{
-		Name:  name,
-		Value: value,
-		Pos:   pos,
+		Object: object,
+		Name:   name,
+		Value:  value,
+		Pos:    pos,
 	}
 }
 
@@ -218,9 +221,35 @@ func (varAssignmentExpr VarAssignmentExpr) Accept(visitor ExprVisitor, env *runt
 }
 
 func (varAssignmentExpr VarAssignmentExpr) ToString() string {
-	return fmt.Sprintf("(VAR_ASSIGNMENT_EXPR: %s = %s)", varAssignmentExpr.Name, varAssignmentExpr.Value.ToString())
+	return fmt.Sprintf("(VAR_ASSIGNMENT_EXPR: %s . %s = %s)", varAssignmentExpr.Object.ToString(), varAssignmentExpr.Name, varAssignmentExpr.Value.ToString())
 }
 
 func (varAssignmentExpr VarAssignmentExpr) GetPosition() position.SEPos {
 	return varAssignmentExpr.Pos
+}
+
+type DotExpr struct {
+	Left  Expr
+	Right token.Token
+	Pos   position.SEPos
+}
+
+func NewDotExpr(left Expr, right token.Token, pos position.SEPos) *DotExpr {
+	return &DotExpr{
+		Left:  left,
+		Right: right,
+		Pos:   pos,
+	}
+}
+
+func (dotExpr DotExpr) Accept(visitor ExprVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return visitor.VisitDotExpr(dotExpr, env)
+}
+
+func (dotExpr DotExpr) ToString() string {
+	return fmt.Sprintf("(DOT_EXPR: %s . %s)", dotExpr.Left.ToString(), dotExpr.Right.ToString())
+}
+
+func (dotExpr DotExpr) GetPosition() position.SEPos {
+	return dotExpr.Pos
 }

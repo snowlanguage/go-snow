@@ -188,30 +188,44 @@ func (parser *Parser) expression() (parsevals.Expr, error) {
 }
 
 func (parser *Parser) assignment() (parsevals.Expr, error) {
-	if parser.currentToken.TType == token.IDENTIFIER && parser.peek().TType == token.SINGLE_EQUALS {
-		identifier := parser.currentToken
-
-		parser.advance()
-		err := parser.consume(token.SINGLE_EQUALS)
-		if err != nil {
-			return nil, err
-		}
-
-		val, err := parser.expression()
-		if err != nil {
-			return nil, err
-		}
-
-		return parsevals.NewVarAssignmentExpr(
-			identifier.Value,
-			val,
-			*identifier.Pos.Start.CreateSEPos(val.GetPosition().End, identifier.Pos.File),
-		), nil
-	}
-
 	logicOr, err := parser.logicOr()
 	if err != nil {
 		return nil, err
+	}
+
+	if parser.currentToken.TType == token.SINGLE_EQUALS {
+		switch logicOr := logicOr.(type) {
+		case *parsevals.DotExpr:
+			parser.advance()
+
+			val, err := parser.expression()
+			if err != nil {
+				return nil, err
+			}
+
+			return parsevals.NewVarAssignmentExpr(
+				logicOr.Left,
+				logicOr.Right.Value,
+				val,
+				*logicOr.GetPosition().Start.CreateSEPos(val.GetPosition().End, logicOr.GetPosition().File),
+			), nil
+		case *parsevals.VarAccessExpr:
+			parser.advance()
+
+			val, err := parser.expression()
+			if err != nil {
+				return nil, err
+			}
+
+			return parsevals.NewVarAssignmentExpr(
+				nil,
+				logicOr.Value,
+				val,
+				*logicOr.GetPosition().Start.CreateSEPos(val.GetPosition().End, logicOr.GetPosition().File),
+			), nil
+		default:
+			return logicOr, nil
+		}
 	}
 
 	return logicOr, nil
@@ -325,6 +339,20 @@ func (parser *Parser) call() (parsevals.Expr, error) {
 	primary, err := parser.primary()
 	if err != nil {
 		return nil, err
+	}
+
+	for parser.currentToken.TType == token.DOT {
+		parser.advance()
+
+		if parser.currentToken.TType != token.IDENTIFIER {
+			return nil, snowerror.NewUnexpectedTokenError(token.IDENTIFIER, parser.currentToken)
+		}
+
+		right := parser.currentToken
+
+		parser.advance()
+
+		primary = parsevals.NewDotExpr(primary, right, *primary.GetPosition().Start.CreateSEPos(right.Pos.End, right.Pos.File))
 	}
 
 	return primary, err

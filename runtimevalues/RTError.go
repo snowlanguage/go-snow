@@ -91,3 +91,27 @@ func NewDivisionByZeroRTError(x RTValue, y RTValue, pos position.SEPos, env *Env
 		environment: env,
 	}
 }
+
+func NewInvalidAttributeRTError(x RTValue, y token.Token, pos position.SEPos, env *Environment) *RTError {
+	return &RTError{
+		SnowError: *snowerror.NewSnowError(
+			snowerror.INVALID_ATTRIBUTE_ERROR,
+			fmt.Sprintf("object of type '%s' has no attribute called '%s'", x.GetType(), y.Value),
+			"",
+			pos,
+		),
+		environment: env,
+	}
+}
+
+func NewUnableToAssignAttributeError(x RTValue, y string, val RTValue, pos position.SEPos, env *Environment) *RTError {
+	return &RTError{
+		SnowError: *snowerror.NewSnowError(
+			snowerror.UNABLE_TO_ASSIGN_ATTRIBUTE_ERROR,
+			fmt.Sprintf("unable to assign '%s' of '%s' to a '%s' with value of '%s'", y, x.GetType(), val.GetType(), val.ValueToString()),
+			"",
+			pos,
+		),
+		environment: env,
+	}
+}

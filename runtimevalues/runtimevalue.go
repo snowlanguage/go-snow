@@ -2,6 +2,7 @@ package runtimevalues
 
 import (
 	"github.com/snowlanguage/go-snow/position"
+	"github.com/snowlanguage/go-snow/token"
 )
 
 type RTValue interface {
@@ -10,6 +11,8 @@ type RTValue interface {
 	GetType() RTType
 	GetValue() interface{}
 	GetEnvironment() *Environment
+	Dot(other token.Token, position position.SEPos) (RTValue, error)
+	SetAttribute(other string, value RTValue, position position.SEPos) (RTValue, error)
 	Add(other RTValue, position position.SEPos) (RTValue, error)
 	Subtract(other RTValue, position position.SEPos) (RTValue, error)
 	Multiply(other RTValue, position position.SEPos) (RTValue, error)

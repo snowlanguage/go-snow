@@ -92,9 +92,9 @@ func run(filename string, code string, e *runtimevalues.Environment) ([]runtimev
 		return nil, err
 	}
 
-	// for _, tok := range t {
-	// 	fmt.Println("token", tok.ToString())
-	// }
+	for _, tok := range t {
+		fmt.Println("token", tok.ToString())
+	}
 
 	p := parser.NewParser(t, f)
 
@@ -107,9 +107,9 @@ func run(filename string, code string, e *runtimevalues.Environment) ([]runtimev
 		return nil, errArray
 	}
 
-	// for _, stmt := range s {
-	// 	fmt.Println("parser", stmt.ToString())
-	// }
+	for _, stmt := range s {
+		fmt.Println("parser", stmt.ToString())
+	}
 
 	i := interpreter.NewInterpreter(s, f, e)
 

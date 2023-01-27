@@ -50,6 +50,10 @@ func (token *Token) ToString() string {
 		str = "<"
 	case LESS_THAN_EQUALS:
 		str = "<="
+	case NEWLINE:
+		str = "(NEWLINE)"
+	case DOT:
+		str = "."
 	case INT:
 		str = fmt.Sprintf("(INT: %s)", token.Value)
 	case FLOAT:

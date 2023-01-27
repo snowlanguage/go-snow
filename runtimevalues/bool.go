@@ -45,6 +45,14 @@ func (rTBool *RTBool) GetEnvironment() *Environment {
 	return rTBool.Environment
 }
 
+func (rTBool *RTBool) Dot(other token.Token, position position.SEPos) (RTValue, error) {
+	return nil, NewInvalidAttributeRTError(rTBool, other, position, rTBool.Environment)
+}
+
+func (rTBool *RTBool) SetAttribute(other string, value RTValue, position position.SEPos) (RTValue, error) {
+	return nil, NewUnableToAssignAttributeError(rTBool, other, value, position, rTBool.Environment)
+}
+
 func (rTBool *RTBool) Add(other RTValue, position position.SEPos) (RTValue, error) {
 	return nil, NewValueRTError(
 		token.PLUS,

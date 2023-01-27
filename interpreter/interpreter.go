@@ -195,10 +195,38 @@ func (interpreter *Interpreter) VisitVarAccessExpr(expr parsevals.VarAccessExpr,
 }
 
 func (interpreter *Interpreter) VisitVarAssignmentExpr(expr parsevals.VarAssignmentExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
-	val, err := interpreter.evaluate(expr.Value, env)
+	if expr.Object == nil {
+		val, err := interpreter.evaluate(expr.Value, env)
+		if err != nil {
+			return nil, err
+		}
+
+		return env.Set(expr.Name, val, expr.Pos)
+	} else {
+		left, err := interpreter.evaluate(expr.Object, env)
+		if err != nil {
+			return nil, err
+		}
+
+		val, err := interpreter.evaluate(expr.Value, env)
+		if err != nil {
+			return nil, err
+		}
+
+		return left.SetAttribute(expr.Name, val, expr.Pos)
+	}
+}
+
+func (interpreter *Interpreter) VisitDotExpr(expr parsevals.DotExpr, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	left, err := interpreter.evaluate(expr.Left, env)
 	if err != nil {
 		return nil, err
 	}
 
-	return env.Set(expr.Name, val, expr.Pos)
+	val, err := left.Dot(expr.Right, expr.Pos)
+	if err != nil {
+		return nil, err
+	}
+
+	return val, nil
 }

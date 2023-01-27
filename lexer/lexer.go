@@ -94,6 +94,9 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 			if err != nil {
 				errors = append(errors, err)
 			}
+		case '.':
+			tokens = append(tokens, *lexer.createSimpleToken(token.DOT))
+			lexer.advance()
 		case '+':
 			tokens = append(tokens, *lexer.createSimpleToken(token.PLUS))
 			lexer.advance()

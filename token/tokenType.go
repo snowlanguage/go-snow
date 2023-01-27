@@ -30,6 +30,8 @@ const (
 	VAR   TokenType = "VAR"
 	CONST TokenType = "CONST"
 
+	DOT TokenType = "DOT"
+
 	NEWLINE TokenType = "NEWLINE"
 
 	EOF TokenType = "EOF"
