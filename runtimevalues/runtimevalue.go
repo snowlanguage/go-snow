@@ -24,4 +24,5 @@ type RTValue interface {
 	LessThan(other RTValue, position position.SEPos) (RTValue, error)
 	LessThanEquals(other RTValue, position position.SEPos) (RTValue, error)
 	Not(position position.SEPos) (RTValue, error)
+	ToBool(position.SEPos) (RTValue, error)
 }

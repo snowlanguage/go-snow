@@ -11,12 +11,16 @@ import (
 type Stmt interface {
 	Accept(visitor StmtVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	ToString() string
+	GetPos() position.SEPos
 }
 
 type StmtVisitor interface {
 	VisitExpressionStmt(stmt ExpressionStmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitVarDeclStmt(stmt VarDeclStmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 	VisitBlockStmt(stmt BlockStmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
+	VisitWhileStmt(stmt WhileStmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
+	VisitBreakStmt(stmt BreakStmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
+	VisitContinueStmt(stmt ContinueStmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error)
 }
 
 type ExpressionStmt struct {
@@ -37,6 +41,10 @@ func (expressionStmt ExpressionStmt) Accept(visitor StmtVisitor, env *runtimeval
 
 func (expressionStmt ExpressionStmt) ToString() string {
 	return fmt.Sprintf("(EXPRESSION: %s)", expressionStmt.Expression.ToString())
+}
+
+func (expressionStmt ExpressionStmt) GetPos() position.SEPos {
+	return expressionStmt.Pos
 }
 
 type VarDeclStmt struct {
@@ -61,6 +69,10 @@ func (varDeclStmt VarDeclStmt) Accept(visitor StmtVisitor, env *runtimevalues.En
 
 func (varDeclStmt VarDeclStmt) ToString() string {
 	return fmt.Sprintf("(VAR_DECL_STMT: %s %s = %s)", varDeclStmt.VarType.Value, varDeclStmt.Identifier.ToString(), varDeclStmt.Expression.ToString())
+}
+
+func (varDeclStmt VarDeclStmt) GetPos() position.SEPos {
+	return varDeclStmt.Pos
 }
 
 type BlockStmt struct {
@@ -89,4 +101,78 @@ func (blockStmt BlockStmt) ToString() string {
 	s += "]"
 
 	return fmt.Sprintf("(BLOCK_STMT(%s): %s)", blockStmt.Name, s)
+}
+
+func (blockStmt BlockStmt) GetPos() position.SEPos {
+	return blockStmt.Pos
+}
+
+type WhileStmt struct {
+	Statement  Stmt
+	Expression Expr
+	Pos        position.SEPos
+}
+
+func NewWhileStmt(statement Stmt, expression Expr, pos position.SEPos) *WhileStmt {
+	return &WhileStmt{
+		Statement:  statement,
+		Expression: expression,
+		Pos:        pos,
+	}
+}
+
+func (whileStmt WhileStmt) Accept(visitor StmtVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return visitor.VisitWhileStmt(whileStmt, env)
+}
+
+func (whileStmt WhileStmt) ToString() string {
+	return fmt.Sprintf("(WHILE_STMT: %s %s)", whileStmt.Expression.ToString(), whileStmt.Statement.ToString())
+}
+
+func (whileStmt WhileStmt) GetPos() position.SEPos {
+	return whileStmt.Pos
+}
+
+type BreakStmt struct {
+	Pos position.SEPos
+}
+
+func NewBreakStmt(pos position.SEPos) *BreakStmt {
+	return &BreakStmt{
+		Pos: pos,
+	}
+}
+
+func (breakStmt BreakStmt) Accept(visitor StmtVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return visitor.VisitBreakStmt(breakStmt, env)
+}
+
+func (breakStmt BreakStmt) ToString() string {
+	return "(BREAK_STMT)"
+}
+
+func (breakStmt BreakStmt) GetPos() position.SEPos {
+	return breakStmt.Pos
+}
+
+type ContinueStmt struct {
+	Pos position.SEPos
+}
+
+func NewContinueStmt(pos position.SEPos) *ContinueStmt {
+	return &ContinueStmt{
+		Pos: pos,
+	}
+}
+
+func (continueStmt ContinueStmt) Accept(visitor StmtVisitor, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	return visitor.VisitContinueStmt(continueStmt, env)
+}
+
+func (continueStmt ContinueStmt) ToString() string {
+	return "(CONTINUE_STMT)"
+}
+
+func (continueStmt ContinueStmt) GetPos() position.SEPos {
+	return continueStmt.Pos
 }

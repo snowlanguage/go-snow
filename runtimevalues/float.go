@@ -222,3 +222,11 @@ func (rTFloat *RTFloat) Not(position position.SEPos) (RTValue, error) {
 
 	return NewRTBool(position, false, rTFloat.Environment), nil
 }
+
+func (rTFloat *RTFloat) ToBool(position position.SEPos) (RTValue, error) {
+	if rTFloat.Value == 0 {
+		return NewRTBool(position, false, rTFloat.Environment), nil
+	}
+
+	return NewRTBool(position, true, rTFloat.Environment), nil
+}

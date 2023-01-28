@@ -223,3 +223,11 @@ func (rTInt *RTInt) Not(position position.SEPos) (RTValue, error) {
 
 	return NewRTBool(position, false, rTInt.Environment), nil
 }
+
+func (rTInt *RTInt) ToBool(position position.SEPos) (RTValue, error) {
+	if rTInt.Value == 0 {
+		return NewRTBool(position, false, rTInt.Environment), nil
+	}
+
+	return NewRTBool(position, true, rTInt.Environment), nil
+}

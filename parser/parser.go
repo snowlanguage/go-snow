@@ -16,6 +16,7 @@ type Parser struct {
 	currentToken token.Token
 	index        int
 	inBlock      int
+	inLoop       int
 }
 
 func NewParser(tokens []token.Token, file *file.File) *Parser {
@@ -157,7 +158,10 @@ func (parser *Parser) varDeclStmt() (parsevals.Stmt, error) {
 		return nil, err
 	}
 
-	parser.consume(token.NEWLINE)
+	err = parser.consume(token.NEWLINE)
+	if err != nil {
+		return nil, err
+	}
 
 	return parsevals.NewVarDeclStmt(startTok, identifier, expr, *startTok.Pos.Start.CreateSEPos(expr.GetPosition().End, startTok.Pos.File)), nil
 }
@@ -165,6 +169,12 @@ func (parser *Parser) varDeclStmt() (parsevals.Stmt, error) {
 func (parser *Parser) statement() (parsevals.Stmt, error) {
 	if parser.currentToken.TType == token.LCURLYBRACKET {
 		return parser.blockStatement()
+	} else if parser.currentToken.TType == token.WHILE {
+		return parser.whileStatement()
+	} else if parser.currentToken.TType == token.BREAK {
+		return parser.breakStmt()
+	} else if parser.currentToken.TType == token.CONTINUE {
+		return parser.continueStmt()
 	}
 
 	statement, err := parser.expressionStmt()
@@ -175,12 +185,40 @@ func (parser *Parser) statement() (parsevals.Stmt, error) {
 	return statement, nil
 }
 
+func (parser *Parser) whileStatement() (parsevals.Stmt, error) {
+	startPos := parser.currentToken.Pos.Start
+
+	err := parser.consume(token.WHILE)
+	if err != nil {
+		return nil, err
+	}
+
+	expr, err := parser.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	parser.inLoop += 1
+
+	stmt, err := parser.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	parser.inLoop -= 1
+
+	return parsevals.NewWhileStmt(stmt, expr, *startPos.CreateSEPos(stmt.GetPos().End, stmt.GetPos().File)), nil
+}
+
 func (parser *Parser) blockStatement(params ...string) (parsevals.Stmt, error) {
 	startPos := parser.currentToken.Pos.Start
 	file := parser.currentToken.Pos.File
 	statements := make([]parsevals.Stmt, 0)
 
-	parser.consume(token.LCURLYBRACKET)
+	err := parser.consume(token.LCURLYBRACKET)
+	if err != nil {
+		return nil, err
+	}
 
 	for parser.currentToken.TType == token.NEWLINE {
 		parser.advance()
@@ -233,6 +271,60 @@ func (parser *Parser) expressionStmt() (parsevals.Stmt, error) {
 	}
 
 	return parsevals.NewExpressionStmt(expression, pos), nil
+}
+
+func (parser *Parser) breakStmt() (parsevals.Stmt, error) {
+	pos := parser.currentToken.Pos
+
+	err := parser.consume(token.BREAK)
+	if err != nil {
+		return nil, err
+	}
+
+	if parser.inLoop == 0 {
+		return nil, snowerror.NewSnowError(
+			snowerror.BREAK_OUTSIDE_OF_LOOP_ERROR,
+			"break statement found outside of loop",
+			"Break statements can only be used inside of loops",
+			pos,
+		)
+	}
+
+	if !(parser.inBlock != 0 && parser.currentToken.TType == token.RCURLYBRACKET) {
+		err = parser.consume(token.NEWLINE)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return parsevals.NewBreakStmt(pos), nil
+}
+
+func (parser *Parser) continueStmt() (parsevals.Stmt, error) {
+	pos := parser.currentToken.Pos
+
+	err := parser.consume(token.CONTINUE)
+	if err != nil {
+		return nil, err
+	}
+
+	if parser.inLoop == 0 {
+		return nil, snowerror.NewSnowError(
+			snowerror.CONTINUE_OUTSIDE_OF_LOOP_ERROR,
+			"continue statement found outside of loop",
+			"Continue statements can only be used inside of loops",
+			pos,
+		)
+	}
+
+	if !(parser.inBlock != 0 && parser.currentToken.TType == token.RCURLYBRACKET) {
+		err = parser.consume(token.NEWLINE)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return parsevals.NewContinueStmt(pos), nil
 }
 
 func (parser *Parser) expression() (parsevals.Expr, error) {
@@ -465,7 +557,10 @@ func (parser *Parser) primary() (parsevals.Expr, error) {
 
 		endPos := parser.currentToken.Pos.End
 
-		parser.consume(token.RPAREN)
+		err = parser.consume(token.RPAREN)
+		if err != nil {
+			return nil, err
+		}
 
 		pos := startToken.Pos.Start.CreateSEPos(endPos, startToken.Pos.File)
 

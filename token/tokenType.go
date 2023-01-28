@@ -26,11 +26,14 @@ const (
 	STRING     TokenType = "STRING"
 	IDENTIFIER TokenType = "IDENTIFIER"
 
-	NOT   TokenType = "NOT"
-	TRUE  TokenType = "TRUE"
-	FALSE TokenType = "FALSE"
-	VAR   TokenType = "VAR"
-	CONST TokenType = "CONST"
+	NOT      TokenType = "NOT"
+	TRUE     TokenType = "TRUE"
+	FALSE    TokenType = "FALSE"
+	VAR      TokenType = "VAR"
+	CONST    TokenType = "CONST"
+	WHILE    TokenType = "WHILE"
+	CONTINUE TokenType = "CONTINUE"
+	BREAK    TokenType = "BREAK"
 
 	DOT TokenType = "DOT"
 

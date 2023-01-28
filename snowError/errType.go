@@ -20,4 +20,6 @@ const (
 	CONSTANT_VARIABLE_ASSIGNMENT_ERROR SnowErrType = "Constant variable assignment error"
 	INVALID_ATTRIBUTE_ERROR            SnowErrType = "Invalid attribute error"
 	UNABLE_TO_ASSIGN_ATTRIBUTE_ERROR   SnowErrType = "Unable to assign attribute error"
+	BREAK_OUTSIDE_OF_LOOP_ERROR        SnowErrType = "Break outside of loop error"
+	CONTINUE_OUTSIDE_OF_LOOP_ERROR     SnowErrType = "Continue outside of loop error"
 )

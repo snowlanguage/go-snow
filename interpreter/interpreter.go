@@ -11,12 +11,17 @@ import (
 )
 
 type Interpreter struct {
-	statements  []parsevals.Stmt
-	file        *file.File
-	currentStmt parsevals.Stmt
-	index       int
-	end         bool
-	environment *runtimevalues.Environment
+	statements   []parsevals.Stmt
+	file         *file.File
+	currentStmt  parsevals.Stmt
+	index        int
+	end          bool
+	environment  *runtimevalues.Environment
+	inLoop       int
+	inFunc       int
+	continueLoop bool
+	breakLoop    bool
+	returnVal    runtimevalues.RTValue
 }
 
 func NewInterpreter(statements []parsevals.Stmt, file *file.File, env *runtimevalues.Environment) *Interpreter {
@@ -98,11 +103,59 @@ func (interpreter *Interpreter) VisitBlockStmt(stmt parsevals.BlockStmt, env *ru
 
 	for _, statement := range stmt.Statements {
 		_, err := interpreter.execute(statement, blockEnv)
+
+		if interpreter.breakLoop || interpreter.continueLoop {
+			return nil, nil
+		}
+
 		if err != nil {
 			return nil, err
 		}
 	}
 
+	return nil, nil
+}
+
+func (interpreter *Interpreter) VisitWhileStmt(stmt parsevals.WhileStmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	exprVisited, err := interpreter.evaluate(stmt.Expression, env)
+	if err != nil {
+		return nil, err
+	}
+
+	interpreter.inLoop += 1
+
+	for exprVisited.GetValue() == true {
+		_, err := interpreter.execute(stmt.Statement, env)
+		if err != nil {
+			return nil, err
+		}
+
+		if interpreter.continueLoop {
+			interpreter.continueLoop = false
+			continue
+		} else if interpreter.breakLoop {
+			interpreter.breakLoop = false
+			break
+		}
+
+		exprVisited, err = interpreter.evaluate(stmt.Expression, env)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	interpreter.inLoop -= 1
+
+	return nil, nil
+}
+
+func (interpreter *Interpreter) VisitBreakStmt(stmt parsevals.BreakStmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	interpreter.breakLoop = true
+	return nil, nil
+}
+
+func (interpreter *Interpreter) VisitContinueStmt(stmt parsevals.ContinueStmt, env *runtimevalues.Environment) (runtimevalues.RTValue, error) {
+	interpreter.continueLoop = true
 	return nil, nil
 }
 
