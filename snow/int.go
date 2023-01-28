@@ -1,19 +1,16 @@
-package runtimevalues
+package snow
 
 import (
 	"fmt"
-
-	"github.com/snowlanguage/go-snow/position"
-	"github.com/snowlanguage/go-snow/token"
 )
 
 type RTInt struct {
-	Pos         position.SEPos
+	Pos         SEPos
 	Value       int
 	Environment *Environment
 }
 
-func NewRTInt(pos position.SEPos, value int, env *Environment) *RTInt {
+func NewRTInt(pos SEPos, value int, env *Environment) *RTInt {
 	return &RTInt{
 		Pos:         pos,
 		Value:       value,
@@ -41,15 +38,15 @@ func (rTInt *RTInt) GetEnvironment() *Environment {
 	return rTInt.Environment
 }
 
-func (rTInt *RTInt) Dot(other token.Token, position position.SEPos) (RTValue, error) {
+func (rTInt *RTInt) Dot(other Token, position SEPos) (RTValue, error) {
 	return nil, NewInvalidAttributeRTError(rTInt, other, position, rTInt.Environment)
 }
 
-func (rTInt *RTInt) SetAttribute(other string, value RTValue, position position.SEPos) (RTValue, error) {
-	return nil, NewUnableToAssignAttributeError(rTInt, other, value, position, rTInt.Environment)
+func (rTInt *RTInt) SetAttribute(other string, value RTValue, position SEPos) (RTValue, error) {
+	return nil, NewUnableToAssignAttributeRTError(rTInt, other, value, position, rTInt.Environment)
 }
 
-func (rTInt *RTInt) Add(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTInt *RTInt) Add(other RTValue, position SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_INT:
 
@@ -59,7 +56,7 @@ func (rTInt *RTInt) Add(other RTValue, position position.SEPos) (RTValue, error)
 	}
 
 	return nil, NewValueRTError(
-		token.PLUS,
+		PLUS,
 		rTInt,
 		other,
 		position,
@@ -67,7 +64,7 @@ func (rTInt *RTInt) Add(other RTValue, position position.SEPos) (RTValue, error)
 	)
 }
 
-func (rTInt *RTInt) Subtract(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTInt *RTInt) Subtract(other RTValue, position SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_INT:
 		return NewRTInt(position, rTInt.Value-other.GetValue().(int), rTInt.Environment), nil
@@ -76,7 +73,7 @@ func (rTInt *RTInt) Subtract(other RTValue, position position.SEPos) (RTValue, e
 	}
 
 	return nil, NewValueRTError(
-		token.PLUS,
+		PLUS,
 		rTInt,
 		other,
 		position,
@@ -84,7 +81,7 @@ func (rTInt *RTInt) Subtract(other RTValue, position position.SEPos) (RTValue, e
 	)
 }
 
-func (rTInt *RTInt) Multiply(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTInt *RTInt) Multiply(other RTValue, position SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_INT:
 		return NewRTInt(position, rTInt.Value*other.GetValue().(int), rTInt.Environment), nil
@@ -93,7 +90,7 @@ func (rTInt *RTInt) Multiply(other RTValue, position position.SEPos) (RTValue, e
 	}
 
 	return nil, NewValueRTError(
-		token.PLUS,
+		PLUS,
 		rTInt,
 		other,
 		position,
@@ -101,7 +98,7 @@ func (rTInt *RTInt) Multiply(other RTValue, position position.SEPos) (RTValue, e
 	)
 }
 
-func (rTInt *RTInt) Divide(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTInt *RTInt) Divide(other RTValue, position SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_INT:
 		if other.GetValue().(int) == 0 {
@@ -118,7 +115,7 @@ func (rTInt *RTInt) Divide(other RTValue, position position.SEPos) (RTValue, err
 	}
 
 	return nil, NewValueRTError(
-		token.PLUS,
+		PLUS,
 		rTInt,
 		other,
 		position,
@@ -126,7 +123,7 @@ func (rTInt *RTInt) Divide(other RTValue, position position.SEPos) (RTValue, err
 	)
 }
 
-func (rTInt *RTInt) Equals(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTInt *RTInt) Equals(other RTValue, position SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_INT:
 		return NewRTBool(position, rTInt.Value == other.GetValue().(int), rTInt.Environment), nil
@@ -137,7 +134,7 @@ func (rTInt *RTInt) Equals(other RTValue, position position.SEPos) (RTValue, err
 	return NewRTBool(position, false, rTInt.Environment), nil
 }
 
-func (rTInt *RTInt) NotEquals(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTInt *RTInt) NotEquals(other RTValue, position SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_INT:
 		return NewRTBool(position, rTInt.Value != other.GetValue().(int), rTInt.Environment), nil
@@ -148,7 +145,7 @@ func (rTInt *RTInt) NotEquals(other RTValue, position position.SEPos) (RTValue, 
 	return NewRTBool(position, true, rTInt.Environment), nil
 }
 
-func (rTInt *RTInt) GreaterThan(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTInt *RTInt) GreaterThan(other RTValue, position SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_INT:
 		return NewRTBool(position, rTInt.Value > other.GetValue().(int), rTInt.Environment), nil
@@ -157,7 +154,7 @@ func (rTInt *RTInt) GreaterThan(other RTValue, position position.SEPos) (RTValue
 	}
 
 	return nil, NewValueRTError(
-		token.GREATER_THAN,
+		GREATER_THAN,
 		rTInt,
 		other,
 		position,
@@ -165,7 +162,7 @@ func (rTInt *RTInt) GreaterThan(other RTValue, position position.SEPos) (RTValue
 	)
 }
 
-func (rTInt *RTInt) GreaterThanEquals(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTInt *RTInt) GreaterThanEquals(other RTValue, position SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_INT:
 		return NewRTBool(position, rTInt.Value >= other.GetValue().(int), rTInt.Environment), nil
@@ -174,7 +171,7 @@ func (rTInt *RTInt) GreaterThanEquals(other RTValue, position position.SEPos) (R
 	}
 
 	return nil, NewValueRTError(
-		token.GREATER_THAN_EQUALS,
+		GREATER_THAN_EQUALS,
 		rTInt,
 		other,
 		position,
@@ -182,7 +179,7 @@ func (rTInt *RTInt) GreaterThanEquals(other RTValue, position position.SEPos) (R
 	)
 }
 
-func (rTInt *RTInt) LessThan(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTInt *RTInt) LessThan(other RTValue, position SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_INT:
 		return NewRTBool(position, rTInt.Value < other.GetValue().(int), rTInt.Environment), nil
@@ -191,7 +188,7 @@ func (rTInt *RTInt) LessThan(other RTValue, position position.SEPos) (RTValue, e
 	}
 
 	return nil, NewValueRTError(
-		token.LESS_THAN,
+		LESS_THAN,
 		rTInt,
 		other,
 		position,
@@ -199,7 +196,7 @@ func (rTInt *RTInt) LessThan(other RTValue, position position.SEPos) (RTValue, e
 	)
 }
 
-func (rTInt *RTInt) LessThanEquals(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTInt *RTInt) LessThanEquals(other RTValue, position SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_INT:
 		return NewRTBool(position, rTInt.Value <= other.GetValue().(int), rTInt.Environment), nil
@@ -208,7 +205,7 @@ func (rTInt *RTInt) LessThanEquals(other RTValue, position position.SEPos) (RTVa
 	}
 
 	return nil, NewValueRTError(
-		token.LESS_THAN_EQUALS,
+		LESS_THAN_EQUALS,
 		rTInt,
 		other,
 		position,
@@ -216,7 +213,7 @@ func (rTInt *RTInt) LessThanEquals(other RTValue, position position.SEPos) (RTVa
 	)
 }
 
-func (rTInt *RTInt) Not(position position.SEPos) (RTValue, error) {
+func (rTInt *RTInt) Not(position SEPos) (RTValue, error) {
 	if rTInt.Value == 0 {
 		return NewRTBool(position, true, rTInt.Environment), nil
 	}
@@ -224,10 +221,14 @@ func (rTInt *RTInt) Not(position position.SEPos) (RTValue, error) {
 	return NewRTBool(position, false, rTInt.Environment), nil
 }
 
-func (rTInt *RTInt) ToBool(position position.SEPos) (RTValue, error) {
+func (rTInt *RTInt) ToBool(position SEPos) (RTValue, error) {
 	if rTInt.Value == 0 {
 		return NewRTBool(position, false, rTInt.Environment), nil
 	}
 
 	return NewRTBool(position, true, rTInt.Environment), nil
+}
+
+func (rTInt *RTInt) Call(arguments []RTValue, position SEPos, interpreter *Interpreter) (RTValue, error) {
+	return nil, NewInvalidCallRTError(rTInt, position, rTInt.Environment)
 }

@@ -1,17 +1,13 @@
-package runtimevalues
+package snow
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
-
-	"github.com/snowlanguage/go-snow/position"
-	snowerror "github.com/snowlanguage/go-snow/snowError"
-	"github.com/snowlanguage/go-snow/token"
 )
 
 type RTError struct {
-	snowerror.SnowError
+	SnowError
 	environment *Environment
 }
 
@@ -47,9 +43,9 @@ func (rTError RTError) Error() string {
 	return fmt.Sprintf("Stack with most recent last:\n%s\n\033[31m%s\033[0m: %s\n%s%d | %s\n%s", strings.Join(stack, "\n"), rTError.ErrType, rTError.Msg, tip, rTError.Pos.Start.Ln, codeAtLine, arrows)
 }
 
-func NewRuntimeError(errType snowerror.SnowErrType, msg string, tip string, pos position.SEPos, env *Environment) *RTError {
+func NewRuntimeError(errType SnowErrType, msg string, tip string, pos SEPos, env *Environment) *RTError {
 	return &RTError{
-		SnowError: *snowerror.NewSnowError(
+		SnowError: *NewSnowError(
 			errType,
 			msg,
 			tip,
@@ -59,40 +55,40 @@ func NewRuntimeError(errType snowerror.SnowErrType, msg string, tip string, pos 
 	}
 }
 
-func NewValueRTError(opTType token.TokenType, x RTValue, y RTValue, pos position.SEPos, env *Environment) *RTError {
+func NewValueRTError(opTType TokenType, x RTValue, y RTValue, pos SEPos, env *Environment) *RTError {
 	var msg string
 	var op string
 	var withBy string
 
 	switch opTType {
-	case token.PLUS:
+	case PLUS:
 		op = "add"
 		withBy = "to"
-	case token.DASH:
+	case DASH:
 		op = "subtract"
 		withBy = "by"
-	case token.STAR:
+	case STAR:
 		op = "multiply"
 		withBy = "by"
-	case token.SLASH:
+	case SLASH:
 		op = "divide"
 		withBy = "by"
-	case token.EQUALS:
+	case EQUALS:
 		op = "check equality between"
 		withBy = "and"
-	case token.NOT_EQUALS:
+	case NOT_EQUALS:
 		op = "check inequality between"
 		withBy = "and"
-	case token.GREATER_THAN:
+	case GREATER_THAN:
 		op = "compare sizes between"
 		withBy = "and"
-	case token.GREATER_THAN_EQUALS:
+	case GREATER_THAN_EQUALS:
 		op = "compare sizes between"
 		withBy = "and"
-	case token.LESS_THAN:
+	case LESS_THAN:
 		op = "compare sizes between"
 		withBy = "and"
-	case token.LESS_THAN_EQUALS:
+	case LESS_THAN_EQUALS:
 		op = "compare sizes between"
 		withBy = "and"
 	}
@@ -104,8 +100,8 @@ func NewValueRTError(opTType token.TokenType, x RTValue, y RTValue, pos position
 	}
 
 	return &RTError{
-		SnowError: *snowerror.NewSnowError(
-			snowerror.VALUE_ERROR,
+		SnowError: *NewSnowError(
+			VALUE_ERROR,
 			msg,
 			"",
 			pos,
@@ -114,10 +110,10 @@ func NewValueRTError(opTType token.TokenType, x RTValue, y RTValue, pos position
 	}
 }
 
-func NewDivisionByZeroRTError(x RTValue, y RTValue, pos position.SEPos, env *Environment) *RTError {
+func NewDivisionByZeroRTError(x RTValue, y RTValue, pos SEPos, env *Environment) *RTError {
 	return &RTError{
-		SnowError: *snowerror.NewSnowError(
-			snowerror.VALUE_ERROR,
+		SnowError: *NewSnowError(
+			VALUE_ERROR,
 			fmt.Sprintf("unable to divide '%s' with value of '%s' by '%s' with value of '%s'", x.GetType(), x.ValueToString(), y.GetType(), y.ValueToString()),
 			"",
 			pos,
@@ -126,10 +122,10 @@ func NewDivisionByZeroRTError(x RTValue, y RTValue, pos position.SEPos, env *Env
 	}
 }
 
-func NewInvalidAttributeRTError(x RTValue, y token.Token, pos position.SEPos, env *Environment) *RTError {
+func NewInvalidAttributeRTError(x RTValue, y Token, pos SEPos, env *Environment) *RTError {
 	return &RTError{
-		SnowError: *snowerror.NewSnowError(
-			snowerror.INVALID_ATTRIBUTE_ERROR,
+		SnowError: *NewSnowError(
+			INVALID_ATTRIBUTE_ERROR,
 			fmt.Sprintf("object of type '%s' has no attribute called '%s'", x.GetType(), y.Value),
 			"",
 			pos,
@@ -138,11 +134,47 @@ func NewInvalidAttributeRTError(x RTValue, y token.Token, pos position.SEPos, en
 	}
 }
 
-func NewUnableToAssignAttributeError(x RTValue, y string, val RTValue, pos position.SEPos, env *Environment) *RTError {
+func NewUnableToAssignAttributeRTError(x RTValue, y string, val RTValue, pos SEPos, env *Environment) *RTError {
 	return &RTError{
-		SnowError: *snowerror.NewSnowError(
-			snowerror.UNABLE_TO_ASSIGN_ATTRIBUTE_ERROR,
+		SnowError: *NewSnowError(
+			UNABLE_TO_ASSIGN_ATTRIBUTE_ERROR,
 			fmt.Sprintf("unable to assign '%s' of '%s' to a '%s' with value of '%s'", y, x.GetType(), val.GetType(), val.ValueToString()),
+			"",
+			pos,
+		),
+		environment: env,
+	}
+}
+
+func NewInvalidCallRTError(x RTValue, pos SEPos, env *Environment) *RTError {
+	return &RTError{
+		SnowError: *NewSnowError(
+			INVALID_CALL_ERROR,
+			fmt.Sprintf("unable to call object of type '%s'", x.GetType()),
+			"",
+			pos,
+		),
+		environment: env,
+	}
+}
+
+func NewTooManyArgumentsRTError(x RTValue, expected int, got int, pos SEPos, env *Environment) *RTError {
+	return &RTError{
+		SnowError: *NewSnowError(
+			ARGUMENT_ERROR,
+			fmt.Sprintf("too may arguments, object of type '%s' expected %d arguments but got %d arguments", x.GetType(), expected, got),
+			"",
+			pos,
+		),
+		environment: env,
+	}
+}
+
+func NewTooFewArgumentsRTError(x RTValue, expected int, got int, pos SEPos, env *Environment) *RTError {
+	return &RTError{
+		SnowError: *NewSnowError(
+			ARGUMENT_ERROR,
+			fmt.Sprintf("too few arguments, object of type '%s' expected %d arguments but got %d arguments", x.GetType(), expected, got),
 			"",
 			pos,
 		),

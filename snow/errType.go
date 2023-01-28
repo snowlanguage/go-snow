@@ -1,4 +1,4 @@
-package snowerror
+package snow
 
 type SnowErrType string
 
@@ -22,4 +22,6 @@ const (
 	UNABLE_TO_ASSIGN_ATTRIBUTE_ERROR   SnowErrType = "Unable to assign attribute error"
 	BREAK_OUTSIDE_OF_LOOP_ERROR        SnowErrType = "Break outside of loop error"
 	CONTINUE_OUTSIDE_OF_LOOP_ERROR     SnowErrType = "Continue outside of loop error"
+	INVALID_CALL_ERROR                 SnowErrType = "Invalid call error"
+	ARGUMENT_ERROR                     SnowErrType = "Argument error"
 )

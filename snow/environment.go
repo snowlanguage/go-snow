@@ -1,16 +1,13 @@
-package runtimevalues
+package snow
 
 import (
 	"fmt"
-
-	"github.com/snowlanguage/go-snow/position"
-	snowerror "github.com/snowlanguage/go-snow/snowError"
 )
 
 type variable struct {
 	Value          RTValue
 	Constant       bool
-	DeclarationPos position.SEPos
+	DeclarationPos SEPos
 }
 
 type Environment struct {
@@ -33,10 +30,10 @@ func NewEnvironment(parent *Environment, name string, startLine int, fileName st
 	}
 }
 
-func (environment *Environment) Declare(constant bool, name string, value RTValue, pos position.SEPos) error {
+func (environment *Environment) Declare(constant bool, name string, value RTValue, pos SEPos) error {
 	if v, ok := environment.vars[name]; ok {
 		return NewRuntimeError(
-			snowerror.VARIABLE_ALREADY_DECLARED_ERROR,
+			VARIABLE_ALREADY_DECLARED_ERROR,
 			fmt.Sprintf("a variable with the name of '%s' has already declared on line %d", name, v.DeclarationPos.Start.Ln),
 			"",
 			pos,
@@ -53,14 +50,14 @@ func (environment *Environment) Declare(constant bool, name string, value RTValu
 	return nil
 }
 
-func (environment *Environment) Get(name string, pos position.SEPos, env *Environment) (RTValue, error) {
+func (environment *Environment) Get(name string, pos SEPos, env *Environment) (RTValue, error) {
 	if _, ok := environment.vars[name]; !ok {
 		if environment.Parent != nil {
 			return environment.Parent.Get(name, pos, env)
 		}
 
 		return nil, NewRuntimeError(
-			snowerror.UNDEFINED_VARIABLE_ERROR,
+			UNDEFINED_VARIABLE_ERROR,
 			fmt.Sprintf("a variable with the name of '%s' could not be found", name),
 			"",
 			pos,
@@ -71,14 +68,14 @@ func (environment *Environment) Get(name string, pos position.SEPos, env *Enviro
 	return environment.vars[name].Value, nil
 }
 
-func (environment *Environment) Set(name string, value RTValue, env *Environment, pos position.SEPos) (RTValue, error) {
+func (environment *Environment) Set(name string, value RTValue, env *Environment, pos SEPos) (RTValue, error) {
 	if _, ok := environment.vars[name]; !ok {
 		if environment.Parent != nil {
 			return environment.Parent.Set(name, value, env, pos)
 		}
 
 		return nil, NewRuntimeError(
-			snowerror.UNDEFINED_VARIABLE_ERROR,
+			UNDEFINED_VARIABLE_ERROR,
 			fmt.Sprintf("a variable with the name of '%s' could not be found", name),
 			"",
 			pos,
@@ -89,7 +86,7 @@ func (environment *Environment) Set(name string, value RTValue, env *Environment
 	v := environment.vars[name]
 	if v.Constant {
 		return nil, NewRuntimeError(
-			snowerror.CONSTANT_VARIABLE_ASSIGNMENT_ERROR,
+			CONSTANT_VARIABLE_ASSIGNMENT_ERROR,
 			fmt.Sprintf("the variable '%s' is a constant and can therefor not be assigned to", name),
 			name,
 			pos,

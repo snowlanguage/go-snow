@@ -6,11 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/snowlanguage/go-snow/file"
-	"github.com/snowlanguage/go-snow/interpreter"
-	"github.com/snowlanguage/go-snow/lexer"
-	"github.com/snowlanguage/go-snow/parser"
-	"github.com/snowlanguage/go-snow/runtimevalues"
+	"github.com/snowlanguage/go-snow/snow"
 )
 
 func logErrors(errors []error) {
@@ -30,7 +26,7 @@ func runFile(file string) {
 		panic(err)
 	}
 
-	env := runtimevalues.NewEnvironment(nil, file, 1, file, true)
+	env := snow.NewEnvironment(nil, file, 1, file, true)
 
 	vals, errors := run(file, string(code), env)
 
@@ -46,7 +42,7 @@ func runFile(file string) {
 func runRepl() {
 	input := bufio.NewReader(os.Stdin)
 
-	env := runtimevalues.NewEnvironment(nil, "<repl>", 1, "<repl>", true)
+	env := snow.NewEnvironment(nil, "<repl>", 1, "<repl>", true)
 
 	code := "a"
 	fmt.Print("> ")
@@ -80,9 +76,9 @@ func runRepl() {
 	}
 }
 
-func run(filename string, code string, e *runtimevalues.Environment) ([]runtimevalues.RTValue, []error) {
-	f := file.NewFile(filename, code)
-	l := lexer.NewLexer(f)
+func run(filename string, code string, e *snow.Environment) ([]snow.RTValue, []error) {
+	f := snow.NewFile(filename, code)
+	l := snow.NewLexer(f)
 
 	fmt.Println("Tokenizing")
 
@@ -96,7 +92,7 @@ func run(filename string, code string, e *runtimevalues.Environment) ([]runtimev
 	// 	fmt.Println("token", tok.ToString())
 	// }
 
-	p := parser.NewParser(t, f)
+	p := snow.NewParser(t, f)
 
 	fmt.Println("Parsing")
 
@@ -111,7 +107,7 @@ func run(filename string, code string, e *runtimevalues.Environment) ([]runtimev
 	// 	fmt.Println("parser", stmt.ToString())
 	// }
 
-	i := interpreter.NewInterpreter(s, f, e)
+	i := snow.NewInterpreter(s, f, e)
 
 	fmt.Println("Interpreting")
 

@@ -1,19 +1,16 @@
-package runtimevalues
+package snow
 
 import (
 	"fmt"
-
-	"github.com/snowlanguage/go-snow/position"
-	"github.com/snowlanguage/go-snow/token"
 )
 
 type RTBool struct {
-	Pos         position.SEPos
+	Pos         SEPos
 	Value       bool
 	Environment *Environment
 }
 
-func NewRTBool(pos position.SEPos, value bool, env *Environment) *RTBool {
+func NewRTBool(pos SEPos, value bool, env *Environment) *RTBool {
 	return &RTBool{
 		Pos:         pos,
 		Value:       value,
@@ -45,17 +42,17 @@ func (rTBool *RTBool) GetEnvironment() *Environment {
 	return rTBool.Environment
 }
 
-func (rTBool *RTBool) Dot(other token.Token, position position.SEPos) (RTValue, error) {
+func (rTBool *RTBool) Dot(other Token, position SEPos) (RTValue, error) {
 	return nil, NewInvalidAttributeRTError(rTBool, other, position, rTBool.Environment)
 }
 
-func (rTBool *RTBool) SetAttribute(other string, value RTValue, position position.SEPos) (RTValue, error) {
-	return nil, NewUnableToAssignAttributeError(rTBool, other, value, position, rTBool.Environment)
+func (rTBool *RTBool) SetAttribute(other string, value RTValue, position SEPos) (RTValue, error) {
+	return nil, NewUnableToAssignAttributeRTError(rTBool, other, value, position, rTBool.Environment)
 }
 
-func (rTBool *RTBool) Add(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTBool *RTBool) Add(other RTValue, position SEPos) (RTValue, error) {
 	return nil, NewValueRTError(
-		token.PLUS,
+		PLUS,
 		rTBool,
 		other,
 		position,
@@ -63,9 +60,9 @@ func (rTBool *RTBool) Add(other RTValue, position position.SEPos) (RTValue, erro
 	)
 }
 
-func (rTBool *RTBool) Subtract(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTBool *RTBool) Subtract(other RTValue, position SEPos) (RTValue, error) {
 	return nil, NewValueRTError(
-		token.DASH,
+		DASH,
 		rTBool,
 		other,
 		position,
@@ -73,9 +70,9 @@ func (rTBool *RTBool) Subtract(other RTValue, position position.SEPos) (RTValue,
 	)
 }
 
-func (rTBool *RTBool) Multiply(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTBool *RTBool) Multiply(other RTValue, position SEPos) (RTValue, error) {
 	return nil, NewValueRTError(
-		token.STAR,
+		STAR,
 		rTBool,
 		other,
 		position,
@@ -83,9 +80,9 @@ func (rTBool *RTBool) Multiply(other RTValue, position position.SEPos) (RTValue,
 	)
 }
 
-func (rTBool *RTBool) Divide(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTBool *RTBool) Divide(other RTValue, position SEPos) (RTValue, error) {
 	return nil, NewValueRTError(
-		token.SLASH,
+		SLASH,
 		rTBool,
 		other,
 		position,
@@ -93,7 +90,7 @@ func (rTBool *RTBool) Divide(other RTValue, position position.SEPos) (RTValue, e
 	)
 }
 
-func (rTBool *RTBool) Equals(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTBool *RTBool) Equals(other RTValue, position SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_BOOL:
 		return NewRTBool(position, rTBool.Value == other.GetValue().(bool), rTBool.Environment), nil
@@ -102,7 +99,7 @@ func (rTBool *RTBool) Equals(other RTValue, position position.SEPos) (RTValue, e
 	return NewRTBool(position, false, rTBool.Environment), nil
 }
 
-func (rTBool *RTBool) NotEquals(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTBool *RTBool) NotEquals(other RTValue, position SEPos) (RTValue, error) {
 	switch other.GetType() {
 	case RTT_BOOL:
 		return NewRTBool(position, rTBool.Value != other.GetValue().(bool), rTBool.Environment), nil
@@ -111,9 +108,9 @@ func (rTBool *RTBool) NotEquals(other RTValue, position position.SEPos) (RTValue
 	return NewRTBool(position, true, rTBool.Environment), nil
 }
 
-func (rTBool *RTBool) GreaterThan(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTBool *RTBool) GreaterThan(other RTValue, position SEPos) (RTValue, error) {
 	return nil, NewValueRTError(
-		token.GREATER_THAN,
+		GREATER_THAN,
 		rTBool,
 		other,
 		position,
@@ -121,9 +118,9 @@ func (rTBool *RTBool) GreaterThan(other RTValue, position position.SEPos) (RTVal
 	)
 }
 
-func (rTBool *RTBool) GreaterThanEquals(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTBool *RTBool) GreaterThanEquals(other RTValue, position SEPos) (RTValue, error) {
 	return nil, NewValueRTError(
-		token.GREATER_THAN_EQUALS,
+		GREATER_THAN_EQUALS,
 		rTBool,
 		other,
 		position,
@@ -131,9 +128,9 @@ func (rTBool *RTBool) GreaterThanEquals(other RTValue, position position.SEPos) 
 	)
 }
 
-func (rTBool *RTBool) LessThan(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTBool *RTBool) LessThan(other RTValue, position SEPos) (RTValue, error) {
 	return nil, NewValueRTError(
-		token.LESS_THAN,
+		LESS_THAN,
 		rTBool,
 		other,
 		position,
@@ -141,9 +138,9 @@ func (rTBool *RTBool) LessThan(other RTValue, position position.SEPos) (RTValue,
 	)
 }
 
-func (rTBool *RTBool) LessThanEquals(other RTValue, position position.SEPos) (RTValue, error) {
+func (rTBool *RTBool) LessThanEquals(other RTValue, position SEPos) (RTValue, error) {
 	return nil, NewValueRTError(
-		token.LESS_THAN_EQUALS,
+		LESS_THAN_EQUALS,
 		rTBool,
 		other,
 		position,
@@ -151,10 +148,14 @@ func (rTBool *RTBool) LessThanEquals(other RTValue, position position.SEPos) (RT
 	)
 }
 
-func (rTBool *RTBool) Not(position position.SEPos) (RTValue, error) {
+func (rTBool *RTBool) Not(position SEPos) (RTValue, error) {
 	return NewRTBool(position, !rTBool.Value, rTBool.Environment), nil
 }
 
-func (rTBool *RTBool) ToBool(position position.SEPos) (RTValue, error) {
+func (rTBool *RTBool) ToBool(position SEPos) (RTValue, error) {
 	return NewRTBool(position, rTBool.Value, rTBool.Environment), nil
+}
+
+func (rTBool *RTBool) Call(arguments []RTValue, position SEPos, interpreter *Interpreter) (RTValue, error) {
+	return nil, NewInvalidCallRTError(rTBool, position, rTBool.Environment)
 }

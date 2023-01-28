@@ -1,22 +1,19 @@
-package snowerror
+package snow
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
-
-	"github.com/snowlanguage/go-snow/position"
-	"github.com/snowlanguage/go-snow/token"
 )
 
 type SnowError struct {
 	ErrType SnowErrType
 	Msg     string
 	Tip     string
-	Pos     position.SEPos
+	Pos     SEPos
 }
 
-func NewSnowError(errType SnowErrType, msg string, tip string, pos position.SEPos) *SnowError {
+func NewSnowError(errType SnowErrType, msg string, tip string, pos SEPos) *SnowError {
 	return &SnowError{
 		ErrType: errType,
 		Msg:     msg,
@@ -37,7 +34,7 @@ func (err SnowError) Error() string {
 	return fmt.Sprintf("\033[31m%s\033[0m: %s\n%s%d | %s\n%s", err.ErrType, err.Msg, tip, err.Pos.Start.Ln, codeAtLine, arrows)
 }
 
-func NewUnexpectedTokenError(expected token.TokenType, got token.Token) *SnowError {
+func NewUnexpectedTokenError(expected TokenType, got Token) *SnowError {
 	return NewSnowError(
 		UNEXPECTED_TOKEN_ERROR,
 		fmt.Sprintf("expected token of type '%s', but instead got token of type '%s'", expected, got.TType),

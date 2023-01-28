@@ -1,6 +1,4 @@
-package position
-
-import "github.com/snowlanguage/go-snow/file"
+package snow
 
 type SimplePos struct {
 	Col int
@@ -16,7 +14,7 @@ func NewSimplePos(col int, ln int, idx int) *SimplePos {
 	}
 }
 
-func (simplePos SimplePos) AsSEPos(file *file.File) *SEPos {
+func (simplePos SimplePos) AsSEPos(file *File) *SEPos {
 	return &SEPos{
 		Start: *NewSimplePos(simplePos.Col, simplePos.Ln, simplePos.Idx),
 		End:   *NewSimplePos(simplePos.Col, simplePos.Ln, simplePos.Idx),
@@ -24,7 +22,7 @@ func (simplePos SimplePos) AsSEPos(file *file.File) *SEPos {
 	}
 }
 
-func (simplePos SimplePos) CreateSEPos(end SimplePos, file *file.File) *SEPos {
+func (simplePos SimplePos) CreateSEPos(end SimplePos, file *File) *SEPos {
 	return &SEPos{
 		Start: *NewSimplePos(simplePos.Col, simplePos.Ln, simplePos.Idx),
 		End:   *NewSimplePos(end.Col, end.Ln, end.Idx),

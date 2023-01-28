@@ -1,4 +1,4 @@
-package token
+package snow
 
 var Keywords = map[string]TokenType{
 	"not":      NOT,
@@ -9,4 +9,5 @@ var Keywords = map[string]TokenType{
 	"while":    WHILE,
 	"continue": CONTINUE,
 	"break":    BREAK,
+	"function": FUNCTION,
 }

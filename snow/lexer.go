@@ -1,24 +1,19 @@
-package lexer
+package snow
 
 import (
 	"fmt"
-
-	"github.com/snowlanguage/go-snow/file"
-	"github.com/snowlanguage/go-snow/position"
-	snowerror "github.com/snowlanguage/go-snow/snowError"
-	"github.com/snowlanguage/go-snow/token"
 )
 
 type Lexer struct {
-	pos         position.SimplePos
-	file        *file.File
+	pos         SimplePos
+	file        *File
 	currentChar byte
 	end         bool
 }
 
-func NewLexer(file *file.File) *Lexer {
+func NewLexer(file *File) *Lexer {
 	return &Lexer{
-		pos:  *position.NewSimplePos(-1, 1, -1),
+		pos:  *NewSimplePos(-1, 1, -1),
 		file: file,
 	}
 }
@@ -56,8 +51,8 @@ func (lexer *Lexer) isPeekEnd() bool {
 	}
 }
 
-func (lexer *Lexer) createSimpleToken(tType token.TokenType) *token.Token {
-	return token.NewToken(tType, "", *lexer.pos.AsSEPos(lexer.file))
+func (lexer *Lexer) createSimpleToken(tType TokenType) *Token {
+	return NewToken(tType, "", *lexer.pos.AsSEPos(lexer.file))
 }
 
 func (lexer *Lexer) isDigit(c byte) bool {
@@ -72,8 +67,8 @@ func (lexer *Lexer) isAlphaDigit(c byte) bool {
 	return lexer.isAlpha(c) || lexer.isDigit(c)
 }
 
-func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
-	tokens := make([]token.Token, 0)
+func (lexer *Lexer) Tokenize() ([]Token, []error) {
+	tokens := make([]Token, 0)
 	errors := make([]error, 0)
 
 	lexer.advance()
@@ -83,7 +78,7 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 
 		switch lexer.currentChar {
 		case '\n':
-			tokens = append(tokens, *lexer.createSimpleToken(token.NEWLINE))
+			tokens = append(tokens, *lexer.createSimpleToken(NEWLINE))
 			lexer.advance()
 		case ' ':
 			lexer.advance()
@@ -96,75 +91,78 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 				errors = append(errors, err)
 			}
 		case '.':
-			tokens = append(tokens, *lexer.createSimpleToken(token.DOT))
+			tokens = append(tokens, *lexer.createSimpleToken(DOT))
+			lexer.advance()
+		case ',':
+			tokens = append(tokens, *lexer.createSimpleToken(COMMA))
 			lexer.advance()
 		case '+':
-			tokens = append(tokens, *lexer.createSimpleToken(token.PLUS))
+			tokens = append(tokens, *lexer.createSimpleToken(PLUS))
 			lexer.advance()
 		case '-':
-			tokens = append(tokens, *lexer.createSimpleToken(token.DASH))
+			tokens = append(tokens, *lexer.createSimpleToken(DASH))
 			lexer.advance()
 		case '*':
-			tokens = append(tokens, *lexer.createSimpleToken(token.STAR))
+			tokens = append(tokens, *lexer.createSimpleToken(STAR))
 			lexer.advance()
 		case '/':
-			tokens = append(tokens, *lexer.createSimpleToken(token.SLASH))
+			tokens = append(tokens, *lexer.createSimpleToken(SLASH))
 			lexer.advance()
 		case '(':
-			tokens = append(tokens, *lexer.createSimpleToken(token.LPAREN))
+			tokens = append(tokens, *lexer.createSimpleToken(LPAREN))
 			lexer.advance()
 		case ')':
-			tokens = append(tokens, *lexer.createSimpleToken(token.RPAREN))
+			tokens = append(tokens, *lexer.createSimpleToken(RPAREN))
 			lexer.advance()
 		case '{':
-			tokens = append(tokens, *lexer.createSimpleToken(token.LCURLYBRACKET))
+			tokens = append(tokens, *lexer.createSimpleToken(LCURLYBRACKET))
 			lexer.advance()
 		case '}':
-			tokens = append(tokens, *lexer.createSimpleToken(token.RCURLYBRACKET))
+			tokens = append(tokens, *lexer.createSimpleToken(RCURLYBRACKET))
 			lexer.advance()
 		case '=':
 			if !lexer.end && lexer.peek() == '=' {
 				lexer.advance()
 
-				tokens = append(tokens, *token.NewToken(
-					token.EQUALS,
+				tokens = append(tokens, *NewToken(
+					EQUALS,
 					"",
 					*startPos.CreateSEPos(lexer.pos, lexer.file),
 				))
 
 				lexer.advance()
 			} else {
-				tokens = append(tokens, *lexer.createSimpleToken(token.SINGLE_EQUALS))
+				tokens = append(tokens, *lexer.createSimpleToken(SINGLE_EQUALS))
 				lexer.advance()
 			}
 		case '<':
 			if !lexer.end && lexer.peek() == '=' {
 				lexer.advance()
 
-				tokens = append(tokens, *token.NewToken(
-					token.LESS_THAN_EQUALS,
+				tokens = append(tokens, *NewToken(
+					LESS_THAN_EQUALS,
 					"",
 					*startPos.CreateSEPos(lexer.pos, lexer.file),
 				))
 
 				lexer.advance()
 			} else {
-				tokens = append(tokens, *lexer.createSimpleToken(token.LESS_THAN))
+				tokens = append(tokens, *lexer.createSimpleToken(LESS_THAN))
 				lexer.advance()
 			}
 		case '>':
 			if !lexer.end && lexer.peek() == '=' {
 				lexer.advance()
 
-				tokens = append(tokens, *token.NewToken(
-					token.GREATER_THAN_EQUALS,
+				tokens = append(tokens, *NewToken(
+					GREATER_THAN_EQUALS,
 					"",
 					*startPos.CreateSEPos(lexer.pos, lexer.file),
 				))
 
 				lexer.advance()
 			} else {
-				tokens = append(tokens, *lexer.createSimpleToken(token.GREATER_THAN))
+				tokens = append(tokens, *lexer.createSimpleToken(GREATER_THAN))
 				lexer.advance()
 			}
 		default:
@@ -192,16 +190,16 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 			} else if lexer.currentChar == '!' && lexer.peek() == '=' {
 				lexer.advance()
 
-				tokens = append(tokens, *token.NewToken(
-					token.NOT_EQUALS,
+				tokens = append(tokens, *NewToken(
+					NOT_EQUALS,
 					"",
 					*startPos.CreateSEPos(lexer.pos, lexer.file),
 				))
 
 				lexer.advance()
 			} else {
-				errors = append(errors, *snowerror.NewSnowError(
-					snowerror.ILLEGAL_CHAR_ERROR,
+				errors = append(errors, *NewSnowError(
+					ILLEGAL_CHAR_ERROR,
 					fmt.Sprintf("illegal character '%c'", lexer.currentChar),
 					"",
 					*lexer.pos.AsSEPos(lexer.file),
@@ -212,12 +210,12 @@ func (lexer *Lexer) Tokenize() ([]token.Token, []error) {
 		}
 	}
 
-	tokens = append(tokens, *lexer.createSimpleToken(token.EOF))
+	tokens = append(tokens, *lexer.createSimpleToken(EOF))
 
 	return tokens, errors
 }
 
-func (lexer *Lexer) makeNumber() (token.Token, error) {
+func (lexer *Lexer) makeNumber() (Token, error) {
 	startPos := lexer.pos
 	endPos := startPos
 	numberStr := string(lexer.currentChar)
@@ -228,8 +226,8 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 	for !lexer.end && (lexer.isDigit(lexer.currentChar) || (lexer.currentChar == '.' && lexer.isDigit(lexer.peek()))) {
 		if lexer.currentChar == '.' {
 			if isFloat && !lexer.isDigit(lexer.peek()) {
-				return *token.NewToken(
-					token.FLOAT,
+				return *NewToken(
+					FLOAT,
 					numberStr,
 					*startPos.CreateSEPos(endPos, lexer.file),
 				), nil
@@ -253,15 +251,15 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 		lexer.advance()
 
 		if !isFloat {
-			return token.Token{}, snowerror.NewSnowError(
-				snowerror.TRAILING_DOT_ERROR,
+			return Token{}, NewSnowError(
+				TRAILING_DOT_ERROR,
 				"Trailing dots are not allowed",
 				fmt.Sprintf("To define a float add a zero after: '%s.0'", numberStr),
 				*pos.AsSEPos(lexer.file),
 			)
 		} else {
-			return token.Token{}, snowerror.NewSnowError(
-				snowerror.MULTIPLE_DOTS_ERROR,
+			return Token{}, NewSnowError(
+				MULTIPLE_DOTS_ERROR,
 				"More than one dot while defining a float is not allowed",
 				fmt.Sprintf("Remove the dot: '%s'", numberStr),
 				*pos.AsSEPos(lexer.file),
@@ -272,8 +270,8 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 
 		lexer.advance()
 
-		return token.Token{}, snowerror.NewSnowError(
-			snowerror.MULTIPLE_DOTS_ERROR,
+		return Token{}, NewSnowError(
+			MULTIPLE_DOTS_ERROR,
 			"More than one dot while defining a float is not allowed",
 			fmt.Sprintf("Remove the dot: '%s'", numberStr),
 			*pos.AsSEPos(lexer.file),
@@ -281,15 +279,15 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 	}
 
 	if isFloat {
-		return *token.NewToken(
-			token.FLOAT,
+		return *NewToken(
+			FLOAT,
 			numberStr,
 			*startPos.CreateSEPos(endPos, lexer.file),
 		), nil
 	}
 
-	tok := *token.NewToken(
-		token.INT,
+	tok := *NewToken(
+		INT,
 		numberStr,
 		*startPos.CreateSEPos(endPos, lexer.file),
 	)
@@ -297,7 +295,7 @@ func (lexer *Lexer) makeNumber() (token.Token, error) {
 	return tok, nil
 }
 
-func (lexer *Lexer) makeString() (token.Token, error) {
+func (lexer *Lexer) makeString() (Token, error) {
 	startPos := lexer.pos
 	startChar := lexer.currentChar
 	strValue := ""
@@ -320,8 +318,8 @@ func (lexer *Lexer) makeString() (token.Token, error) {
 		} else {
 			str = fmt.Sprintf("\"'%s'\"", strValue)
 		}
-		return token.Token{}, snowerror.NewSnowError(
-			snowerror.UNTERMINATED_STRING_ERROR,
+		return Token{}, NewSnowError(
+			UNTERMINATED_STRING_ERROR,
 			"the string was never closed",
 			fmt.Sprintf("Add a closing quote to the end of the string: %s", str),
 			*startPos.CreateSEPos(endPos, lexer.file),
@@ -331,14 +329,14 @@ func (lexer *Lexer) makeString() (token.Token, error) {
 	endPos = lexer.pos
 	lexer.advance()
 
-	return *token.NewToken(
-		token.STRING,
+	return *NewToken(
+		STRING,
 		strValue,
 		*startPos.CreateSEPos(endPos, lexer.file),
 	), nil
 }
 
-func (lexer *Lexer) makeIdentifierKeyword() (token.Token, error) {
+func (lexer *Lexer) makeIdentifierKeyword() (Token, error) {
 	startPos := lexer.pos
 	endPos := startPos
 	valueStr := string(lexer.currentChar)
@@ -352,22 +350,22 @@ func (lexer *Lexer) makeIdentifierKeyword() (token.Token, error) {
 		lexer.advance()
 	}
 
-	tType, ok := token.Keywords[valueStr]
+	tType, ok := Keywords[valueStr]
 	if !ok {
-		tType = token.IDENTIFIER
+		tType = IDENTIFIER
 	}
 
-	return *token.NewToken(
+	return *NewToken(
 		tType,
 		valueStr,
 		*startPos.CreateSEPos(endPos, lexer.file),
 	), nil
 }
 
-func (lexer *Lexer) makeComment() (token.Token, error) {
+func (lexer *Lexer) makeComment() (Token, error) {
 	inline := false
 	startPos := lexer.pos
-	var lastPos position.SimplePos
+	var lastPos SimplePos
 
 	lexer.advance()
 
@@ -383,9 +381,9 @@ func (lexer *Lexer) makeComment() (token.Token, error) {
 			lexer.advance()
 			lexer.advance()
 
-			return token.Token{}, nil
+			return Token{}, nil
 		} else if !inline && lexer.currentChar == '\n' {
-			return token.Token{}, nil
+			return Token{}, nil
 		}
 
 		lastPos = lexer.pos
@@ -394,13 +392,13 @@ func (lexer *Lexer) makeComment() (token.Token, error) {
 	}
 
 	if inline && lexer.end {
-		return token.Token{}, snowerror.NewSnowError(
-			snowerror.UNTERMINATED_INLINE_COMMENT_ERROR,
+		return Token{}, NewSnowError(
+			UNTERMINATED_INLINE_COMMENT_ERROR,
 			"the inline comment was never closed",
 			"Add '/#' to close the inline comment",
 			*startPos.CreateSEPos(lastPos, lexer.file),
 		)
 	}
 
-	return token.Token{}, nil
+	return Token{}, nil
 }

@@ -1,4 +1,4 @@
-package token
+package snow
 
 type TokenType string
 
@@ -34,8 +34,10 @@ const (
 	WHILE    TokenType = "WHILE"
 	CONTINUE TokenType = "CONTINUE"
 	BREAK    TokenType = "BREAK"
+	FUNCTION TokenType = "FUNCTION"
 
-	DOT TokenType = "DOT"
+	DOT   TokenType = "DOT"
+	COMMA TokenType = "COMMA"
 
 	NEWLINE TokenType = "NEWLINE"
 

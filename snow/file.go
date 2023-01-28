@@ -1,4 +1,4 @@
-package file
+package snow
 
 type File struct {
 	Name string

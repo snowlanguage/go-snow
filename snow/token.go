@@ -1,18 +1,16 @@
-package token
+package snow
 
 import (
 	"fmt"
-
-	"github.com/snowlanguage/go-snow/position"
 )
 
 type Token struct {
 	TType TokenType
 	Value string
-	Pos   position.SEPos
+	Pos   SEPos
 }
 
-func NewToken(tToken TokenType, value string, pos position.SEPos) *Token {
+func NewToken(tToken TokenType, value string, pos SEPos) *Token {
 	return &Token{
 		TType: tToken,
 		Value: value,
@@ -58,6 +56,8 @@ func (token *Token) ToString() string {
 		str = "(NEWLINE)"
 	case DOT:
 		str = "."
+	case COMMA:
+		str = ","
 	case INT:
 		str = fmt.Sprintf("(INT: %s)", token.Value)
 	case FLOAT:
