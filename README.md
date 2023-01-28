@@ -5,4 +5,9 @@
 <h1 align="center">Snow Language</h1>
 <p align="center">A programming language made in Go for fun</p>
 
-----
+<div align="center">
+  
+  <a href="https://github.com/snowlanguage/go-snow/releases">![GitHub release (latest by date)](https://img.shields.io/github/v/release/snowlanguage/go-snow?label=Stable%20release)</a>
+  <a href="">![GitHub commit activity](https://img.shields.io/github/commit-activity/m/snowlanguage/go-snow?label=Commit%20activity)</a>
+  
+</div>
