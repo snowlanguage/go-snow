@@ -10,4 +10,5 @@ var Keywords = map[string]TokenType{
 	"continue": CONTINUE,
 	"break":    BREAK,
 	"function": FUNCTION,
+	"return":   RETURN,
 }

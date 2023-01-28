@@ -35,6 +35,7 @@ const (
 	CONTINUE TokenType = "CONTINUE"
 	BREAK    TokenType = "BREAK"
 	FUNCTION TokenType = "FUNCTION"
+	RETURN   TokenType = "RETURN"
 
 	DOT   TokenType = "DOT"
 	COMMA TokenType = "COMMA"

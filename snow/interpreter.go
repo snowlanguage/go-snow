@@ -15,6 +15,7 @@ type Interpreter struct {
 	inFunc       int
 	continueLoop bool
 	breakLoop    bool
+	returnBlock  bool
 	returnVal    RTValue
 }
 
@@ -100,15 +101,15 @@ func (interpreter *Interpreter) VisitBlockStmt(stmt BlockStmt, env *Environment,
 		if newEnv {
 			_, err = interpreter.execute(statement, blockEnv)
 		} else {
-			_, err = interpreter.execute(statement, blockEnv)
-		}
-
-		if interpreter.breakLoop || interpreter.continueLoop {
-			return nil, nil
+			_, err = interpreter.execute(statement, env)
 		}
 
 		if err != nil {
 			return nil, err
+		}
+
+		if interpreter.breakLoop || interpreter.continueLoop || interpreter.returnBlock {
+			return nil, nil
 		}
 	}
 
@@ -176,6 +177,22 @@ func (interpreter *Interpreter) VisitBreakStmt(stmt BreakStmt, env *Environment)
 
 func (interpreter *Interpreter) VisitContinueStmt(stmt ContinueStmt, env *Environment) (RTValue, error) {
 	interpreter.continueLoop = true
+	return nil, nil
+}
+
+func (interpreter *Interpreter) VisitReturnStmt(stmt ReturnStmt, env *Environment) (RTValue, error) {
+	interpreter.returnBlock = true
+
+	if stmt.Value != nil {
+		val, err := interpreter.evaluate(stmt.Value, env)
+		if err != nil {
+			// fmt.Println(err)
+			return nil, err
+		}
+
+		interpreter.returnVal = val
+	}
+
 	return nil, nil
 }
 

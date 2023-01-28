@@ -7,12 +7,12 @@ import (
 type RTFunction struct {
 	Name        string
 	Parameters  []Token
-	Block       Stmt
+	Block       *BlockStmt
 	Pos         SEPos
 	Environment *Environment
 }
 
-func NewRTFunction(name string, parameters []Token, block Stmt, pos SEPos, env *Environment) *RTFunction {
+func NewRTFunction(name string, parameters []Token, block *BlockStmt, pos SEPos, env *Environment) *RTFunction {
 	return &RTFunction{
 		Name:        name,
 		Parameters:  parameters,
@@ -171,13 +171,14 @@ func (rTFunction *RTFunction) Call(arguments []RTValue, position SEPos, interpre
 		}
 	}
 
-	_, err := interpreter.execute(rTFunction.Block, runEnv)
+	_, err := interpreter.VisitBlockStmt(*rTFunction.Block, runEnv, false)
 	if err != nil {
 		return nil, err
 	}
 
 	val := interpreter.returnVal
 	interpreter.returnVal = nil
+	interpreter.returnBlock = false
 
 	return val, nil
 }

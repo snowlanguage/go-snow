@@ -190,7 +190,7 @@ func (parser *Parser) functionDeclStmt() (Stmt, error) {
 
 	fmt.Println("yes5")
 
-	return NewFunctionDeclStmt(name.Value, parameters, block, *startPos.CreateSEPos(block.GetPos().End, block.GetPos().File)), nil
+	return NewFunctionDeclStmt(name.Value, parameters, block.(*BlockStmt), *startPos.CreateSEPos(block.GetPos().End, block.GetPos().File)), nil
 }
 
 func (parser *Parser) varDeclStmt() (Stmt, error) {
@@ -235,6 +235,8 @@ func (parser *Parser) statement() (Stmt, error) {
 		return parser.breakStmt()
 	} else if parser.currentToken.TType == CONTINUE {
 		return parser.continueStmt()
+	} else if parser.currentToken.TType == RETURN {
+		return parser.returnStmt()
 	}
 
 	statement, err := parser.expressionStmt()
@@ -331,6 +333,44 @@ func (parser *Parser) expressionStmt() (Stmt, error) {
 	}
 
 	return NewExpressionStmt(expression, pos), nil
+}
+
+func (parser *Parser) returnStmt() (Stmt, error) {
+	pos := parser.currentToken.Pos
+
+	err := parser.consume(RETURN)
+	if err != nil {
+		return nil, err
+	}
+
+	if parser.inBlock == 0 {
+		return nil, NewSnowError(
+			RETURN_OUTSIDE_OF_LOOP_ERROR,
+			"return statement found outside of block",
+			"Return statements can only be used inside of blocks",
+			pos,
+		)
+	}
+
+	var value Expr
+	endPos := parser.currentToken.Pos.End
+	if parser.currentToken.TType != NEWLINE {
+		value, err = parser.expression()
+		if err != nil {
+			return nil, err
+		}
+
+		endPos = value.GetPosition().End
+	}
+
+	if !(parser.inBlock != 0 && parser.currentToken.TType == RCURLYBRACKET) {
+		err = parser.consume(NEWLINE)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return NewReturnStmt(value, *pos.Start.CreateSEPos(endPos, parser.currentToken.Pos.File)), nil
 }
 
 func (parser *Parser) breakStmt() (Stmt, error) {

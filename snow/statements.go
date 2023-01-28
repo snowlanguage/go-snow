@@ -18,6 +18,7 @@ type StmtVisitor interface {
 	VisitBreakStmt(stmt BreakStmt, env *Environment) (RTValue, error)
 	VisitContinueStmt(stmt ContinueStmt, env *Environment) (RTValue, error)
 	VisitFunctionDeclStmt(stmt FunctionDeclStmt, env *Environment) (RTValue, error)
+	VisitReturnStmt(stmt ReturnStmt, env *Environment) (RTValue, error)
 }
 
 type ExpressionStmt struct {
@@ -177,11 +178,11 @@ func (continueStmt ContinueStmt) GetPos() SEPos {
 type FunctionDeclStmt struct {
 	Name       string
 	Parameters []Token
-	Block      Stmt
+	Block      *BlockStmt
 	Pos        SEPos
 }
 
-func NewFunctionDeclStmt(name string, parameters []Token, block Stmt, pos SEPos) *FunctionDeclStmt {
+func NewFunctionDeclStmt(name string, parameters []Token, block *BlockStmt, pos SEPos) *FunctionDeclStmt {
 	return &FunctionDeclStmt{
 		Name:       name,
 		Parameters: parameters,
@@ -206,4 +207,28 @@ func (functionDeclStmt FunctionDeclStmt) ToString() string {
 
 func (functionDeclStmt FunctionDeclStmt) GetPos() SEPos {
 	return functionDeclStmt.Pos
+}
+
+type ReturnStmt struct {
+	Value Expr
+	Pos   SEPos
+}
+
+func NewReturnStmt(value Expr, pos SEPos) *ReturnStmt {
+	return &ReturnStmt{
+		Value: value,
+		Pos:   pos,
+	}
+}
+
+func (returnStmt ReturnStmt) Accept(visitor StmtVisitor, env *Environment) (RTValue, error) {
+	return visitor.VisitReturnStmt(returnStmt, env)
+}
+
+func (returnStmt ReturnStmt) ToString() string {
+	return fmt.Sprintf("(RETURN_STMT: %s)", returnStmt.Value.ToString())
+}
+
+func (returnStmt ReturnStmt) GetPos() SEPos {
+	return returnStmt.Pos
 }
