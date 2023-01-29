@@ -91,8 +91,6 @@ func (parser *Parser) Parse() ([]Stmt, error) {
 	parser.advance()
 
 	for parser.currentToken.TType != EOF {
-		fmt.Println(parser.currentToken.TType)
-
 		if parser.currentToken.TType == NEWLINE {
 			parser.advance()
 
@@ -104,12 +102,8 @@ func (parser *Parser) Parse() ([]Stmt, error) {
 			return nil, err
 		}
 
-		fmt.Println("stmt done", stmt)
-
 		statements = append(statements, stmt)
 	}
-
-	fmt.Println("done parsing")
 
 	return statements, nil
 }
@@ -128,7 +122,6 @@ func (parser *Parser) deceleration() (Stmt, error) {
 		return varDeclStmt, nil
 	} else if parser.currentToken.TType == FUNCTION {
 		function, err := parser.functionDeclStmt()
-		fmt.Println(function, err)
 		if err != nil {
 			return nil, err
 		}
@@ -166,7 +159,6 @@ func (parser *Parser) functionDeclStmt() (Stmt, error) {
 	parameters := make([]Token, 0)
 
 	for parser.currentToken.TType != EOF && parser.currentToken.TType != RPAREN {
-		fmt.Println("args")
 		parameter := parser.currentToken
 
 		err = parser.consume(IDENTIFIER)
@@ -189,14 +181,10 @@ func (parser *Parser) functionDeclStmt() (Stmt, error) {
 		return nil, err
 	}
 
-	fmt.Println("bloc")
-
 	block, err := parser.blockStatement()
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("block end")
 
 	return NewFunctionDeclStmt(name.Value, parameters, block.(*BlockStmt), *startPos.CreateSEPos(block.GetPos().End, block.GetPos().File)), nil
 }
@@ -297,8 +285,6 @@ func (parser *Parser) blockStatement(params ...string) (Stmt, error) {
 	parser.inBlock += 1
 
 	for parser.currentToken.TType != RCURLYBRACKET && parser.currentToken.TType != EOF {
-		fmt.Println("stuck here")
-
 		if parser.currentToken.TType == NEWLINE {
 			parser.advance()
 
@@ -352,7 +338,6 @@ func (parser *Parser) expressionStmt() (Stmt, error) {
 }
 
 func (parser *Parser) returnStmt() (Stmt, error) {
-	fmt.Println("return")
 	pos := parser.currentToken.Pos
 
 	err := parser.consume(RETURN)
