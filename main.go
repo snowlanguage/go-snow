@@ -89,7 +89,7 @@ func run(filename string, code string, e *snow.Environment) ([]snow.RTValue, []e
 	}
 
 	// for _, tok := range t {
-	// 	fmt.Println("token", tok.ToString())
+	// 	fmt.Println("token", tok.TType, tok.Pos)
 	// }
 
 	p := snow.NewParser(t, f)
@@ -104,7 +104,7 @@ func run(filename string, code string, e *snow.Environment) ([]snow.RTValue, []e
 	}
 
 	// for _, stmt := range s {
-	// 	fmt.Println("parser", stmt.ToString())
+	// 	fmt.Println("parser", stmt)
 	// }
 
 	i := snow.NewInterpreter(s, f, e)
