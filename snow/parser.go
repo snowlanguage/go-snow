@@ -91,6 +91,8 @@ func (parser *Parser) Parse() ([]Stmt, error) {
 	parser.advance()
 
 	for parser.currentToken.TType != EOF {
+		fmt.Println(parser.currentToken.TType)
+
 		if parser.currentToken.TType == NEWLINE {
 			parser.advance()
 
@@ -102,8 +104,12 @@ func (parser *Parser) Parse() ([]Stmt, error) {
 			return nil, err
 		}
 
+		fmt.Println("stmt done", stmt)
+
 		statements = append(statements, stmt)
 	}
+
+	fmt.Println("done parsing")
 
 	return statements, nil
 }
@@ -121,8 +127,13 @@ func (parser *Parser) deceleration() (Stmt, error) {
 
 		return varDeclStmt, nil
 	} else if parser.currentToken.TType == FUNCTION {
-		fmt.Println("yes")
-		return parser.functionDeclStmt()
+		function, err := parser.functionDeclStmt()
+		fmt.Println(function, err)
+		if err != nil {
+			return nil, err
+		}
+
+		return function, nil
 	}
 
 	statement, err := parser.statement()
@@ -141,15 +152,11 @@ func (parser *Parser) functionDeclStmt() (Stmt, error) {
 		return nil, err
 	}
 
-	fmt.Println("yes2")
-
 	name := parser.currentToken
 	err = parser.consume(IDENTIFIER)
 	if err != nil {
 		return nil, err
 	}
-
-	fmt.Println("yes3")
 
 	err = parser.consume(LPAREN)
 	if err != nil {
@@ -159,6 +166,7 @@ func (parser *Parser) functionDeclStmt() (Stmt, error) {
 	parameters := make([]Token, 0)
 
 	for parser.currentToken.TType != EOF && parser.currentToken.TType != RPAREN {
+		fmt.Println("args")
 		parameter := parser.currentToken
 
 		err = parser.consume(IDENTIFIER)
@@ -181,14 +189,14 @@ func (parser *Parser) functionDeclStmt() (Stmt, error) {
 		return nil, err
 	}
 
-	fmt.Println("yes4")
+	fmt.Println("bloc")
 
 	block, err := parser.blockStatement()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println("yes5")
+	fmt.Println("block end")
 
 	return NewFunctionDeclStmt(name.Value, parameters, block.(*BlockStmt), *startPos.CreateSEPos(block.GetPos().End, block.GetPos().File)), nil
 }
@@ -289,6 +297,14 @@ func (parser *Parser) blockStatement(params ...string) (Stmt, error) {
 	parser.inBlock += 1
 
 	for parser.currentToken.TType != RCURLYBRACKET && parser.currentToken.TType != EOF {
+		fmt.Println("stuck here")
+
+		if parser.currentToken.TType == NEWLINE {
+			parser.advance()
+
+			continue
+		}
+
 		statement, err := parser.deceleration()
 		if err != nil {
 			return nil, err
@@ -336,6 +352,7 @@ func (parser *Parser) expressionStmt() (Stmt, error) {
 }
 
 func (parser *Parser) returnStmt() (Stmt, error) {
+	fmt.Println("return")
 	pos := parser.currentToken.Pos
 
 	err := parser.consume(RETURN)
@@ -608,7 +625,6 @@ func (parser *Parser) call() (Expr, error) {
 
 			arguments := make([]Expr, 0)
 
-			fmt.Println(parser.currentToken.TType)
 			for parser.currentToken.TType != RPAREN && parser.currentToken.TType != EOF {
 				argument, err := parser.expression()
 				if err != nil {
@@ -616,7 +632,6 @@ func (parser *Parser) call() (Expr, error) {
 				}
 
 				arguments = append(arguments, argument)
-				fmt.Println("a", arguments)
 
 				if parser.currentToken.TType != RPAREN {
 					err = parser.consume(COMMA)
@@ -625,8 +640,6 @@ func (parser *Parser) call() (Expr, error) {
 					}
 				}
 			}
-
-			fmt.Printf("arguments: %v\n", arguments)
 
 			endPos := parser.currentToken.Pos.End
 

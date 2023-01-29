@@ -155,7 +155,6 @@ func (rTFunction *RTFunction) ToBool(position SEPos) (RTValue, error) {
 }
 
 func (rTFunction *RTFunction) Call(arguments []RTValue, position SEPos, interpreter *Interpreter) (RTValue, error) {
-	fmt.Println(arguments, rTFunction.Parameters)
 	if len(arguments) > len(rTFunction.Parameters) {
 		return nil, NewTooManyArgumentsRTError(rTFunction, len(rTFunction.Parameters), len(arguments), position, interpreter.environment)
 	} else if len(arguments) < len(rTFunction.Parameters) {

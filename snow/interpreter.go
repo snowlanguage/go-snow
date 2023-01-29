@@ -186,7 +186,6 @@ func (interpreter *Interpreter) VisitReturnStmt(stmt ReturnStmt, env *Environmen
 	if stmt.Value != nil {
 		val, err := interpreter.evaluate(stmt.Value, env)
 		if err != nil {
-			// fmt.Println(err)
 			return nil, err
 		}
 
@@ -351,8 +350,6 @@ func (interpreter *Interpreter) VisitCallExpr(expr CallExpr, env *Environment) (
 
 		arguments = append(arguments, argVisited)
 	}
-
-	fmt.Printf("arguments: %v\n", arguments)
 
 	interpreter.inFunc += 1
 
