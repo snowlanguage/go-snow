@@ -233,6 +233,8 @@ func (parser *Parser) statement() (Stmt, error) {
 		return parser.continueStmt()
 	} else if parser.currentToken.TType == RETURN {
 		return parser.returnStmt()
+	} else if parser.currentToken.TType == IF {
+		return parser.ifStatement()
 	}
 
 	statement, err := parser.expressionStmt()
@@ -241,6 +243,90 @@ func (parser *Parser) statement() (Stmt, error) {
 	}
 
 	return statement, nil
+}
+
+func (parser *Parser) ifStatement() (Stmt, error) {
+	startPos := parser.currentToken.Pos.Start
+
+	err := parser.consume(IF)
+	if err != nil {
+		return nil, err
+	}
+
+	ifExpr, err := parser.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("in")
+
+	ifStmt, err := parser.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("out")
+
+	firstIf := NewIfStmt(ifExpr, ifStmt, *startPos.CreateSEPos(ifStmt.GetPos().End, ifStmt.GetPos().File))
+
+	fmt.Println("1")
+
+	stmts := make([]IfStmt, 0)
+	stmts = append(stmts, *firstIf)
+
+	fmt.Println(parser.currentToken.TType)
+
+	for parser.currentToken.TType == ELIF {
+		fmt.Println(parser.currentToken)
+		elifStartPos := parser.currentToken.Pos.Start
+
+		parser.advance()
+
+		elifExpr, err := parser.expression()
+		if err != nil {
+			return nil, err
+		}
+
+		elifStmt, err := parser.statement()
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println("2")
+
+		stmts = append(stmts, *NewIfStmt(
+			elifExpr,
+			elifStmt,
+			*elifStartPos.CreateSEPos(elifStmt.GetPos().End, elifExpr.GetPosition().File),
+		))
+
+		fmt.Println(parser.currentToken)
+	}
+
+	if parser.currentToken.TType == ELSE {
+		elseStartPos := parser.currentToken.Pos.Start
+
+		parser.advance()
+
+		elseStmt, err := parser.statement()
+		if err != nil {
+			return nil, err
+		}
+
+		stmts = append(stmts, *NewIfStmt(
+			nil,
+			elseStmt,
+			*elseStartPos.CreateSEPos(elseStmt.GetPos().End, elseStmt.GetPos().File),
+		))
+	}
+
+	if parser.currentToken.TType != EOF && !(parser.inBlock != 0 && parser.currentToken.TType == RCURLYBRACKET) {
+		err := parser.consume(NEWLINE)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return NewIfStmtContainer(stmts, *startPos.CreateSEPos(stmts[len(stmts)-1].Pos.End, firstIf.Pos.File)), nil
 }
 
 func (parser *Parser) whileStatement() (Stmt, error) {
@@ -304,8 +390,6 @@ func (parser *Parser) blockStatement(params ...string) (Stmt, error) {
 	if parser.currentToken.TType != RCURLYBRACKET {
 		return nil, NewUnexpectedTokenError(RCURLYBRACKET, parser.currentToken)
 	}
-
-	parser.advance()
 
 	endPos := parser.currentToken.Pos
 

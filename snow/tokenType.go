@@ -36,6 +36,9 @@ const (
 	BREAK    TokenType = "BREAK"
 	FUNCTION TokenType = "FUNCTION"
 	RETURN   TokenType = "RETURN"
+	IF       TokenType = "IF"
+	ELIF     TokenType = "ELIF"
+	ELSE     TokenType = "ELSE"
 
 	DOT   TokenType = "DOT"
 	COMMA TokenType = "COMMA"

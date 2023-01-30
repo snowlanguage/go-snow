@@ -11,4 +11,7 @@ var Keywords = map[string]TokenType{
 	"break":    BREAK,
 	"function": FUNCTION,
 	"return":   RETURN,
+	"if":       IF,
+	"elif":     ELIF,
+	"else":     ELSE,
 }

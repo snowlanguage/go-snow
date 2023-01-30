@@ -116,6 +116,42 @@ func (interpreter *Interpreter) VisitBlockStmt(stmt BlockStmt, env *Environment,
 	return nil, nil
 }
 
+func (interpreter *Interpreter) VisitIfStmtContainer(stmt IfStmtContainer, env *Environment) (RTValue, error) {
+	for _, ifStmt := range stmt.IfStmts {
+		val, err := interpreter.VisitIfStmt(ifStmt, env)
+		if err != nil {
+			return nil, err
+		}
+
+		if val != nil {
+			break
+		}
+	}
+
+	return nil, nil
+}
+
+func (interpreter *Interpreter) VisitIfStmt(stmt IfStmt, env *Environment) (RTValue, error) {
+	if stmt.Expression != nil {
+		exprEvaluated, err := interpreter.evaluate(stmt.Expression, env)
+		if err != nil {
+			return nil, err
+		}
+
+		exprAsBool, err := exprEvaluated.ToBool(stmt.Expression.GetPosition())
+		if exprAsBool.GetValue() == false {
+			return nil, nil
+		}
+	}
+
+	_, err := interpreter.execute(stmt.Statement, env)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewRTBool(stmt.Pos, true, env), nil
+}
+
 func (interpreter *Interpreter) VisitWhileStmt(stmt WhileStmt, env *Environment) (RTValue, error) {
 	exprVisited, err := interpreter.evaluate(stmt.Expression, env)
 	if err != nil {

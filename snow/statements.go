@@ -19,6 +19,8 @@ type StmtVisitor interface {
 	VisitContinueStmt(stmt ContinueStmt, env *Environment) (RTValue, error)
 	VisitFunctionDeclStmt(stmt FunctionDeclStmt, env *Environment) (RTValue, error)
 	VisitReturnStmt(stmt ReturnStmt, env *Environment) (RTValue, error)
+	VisitIfStmt(stmt IfStmt, env *Environment) (RTValue, error)
+	VisitIfStmtContainer(stmt IfStmtContainer, env *Environment) (RTValue, error)
 }
 
 type ExpressionStmt struct {
@@ -231,4 +233,54 @@ func (returnStmt ReturnStmt) ToString() string {
 
 func (returnStmt ReturnStmt) GetPos() SEPos {
 	return returnStmt.Pos
+}
+
+type IfStmt struct {
+	Expression Expr
+	Statement  Stmt
+	Pos        SEPos
+}
+
+func NewIfStmt(expression Expr, statement Stmt, pos SEPos) *IfStmt {
+	return &IfStmt{
+		Expression: expression,
+		Statement:  statement,
+		Pos:        pos,
+	}
+}
+
+func (ifStmt IfStmt) Accept(visitor StmtVisitor, env *Environment) (RTValue, error) {
+	return visitor.VisitIfStmt(ifStmt, env)
+}
+
+func (ifStmt IfStmt) ToString() string {
+	return fmt.Sprintf("(IF_STMT: %s %s)", ifStmt.Expression.ToString(), ifStmt.Statement.ToString())
+}
+
+func (ifStmt IfStmt) GetPos() SEPos {
+	return ifStmt.Pos
+}
+
+type IfStmtContainer struct {
+	IfStmts []IfStmt
+	Pos     SEPos
+}
+
+func NewIfStmtContainer(ifStmts []IfStmt, pos SEPos) *IfStmtContainer {
+	return &IfStmtContainer{
+		IfStmts: ifStmts,
+		Pos:     pos,
+	}
+}
+
+func (ifStmtContainer IfStmtContainer) Accept(visitor StmtVisitor, env *Environment) (RTValue, error) {
+	return visitor.VisitIfStmtContainer(ifStmtContainer, env)
+}
+
+func (ifStmtContainer IfStmtContainer) ToString() string {
+	return fmt.Sprintf("(ifStmtContainer)")
+}
+
+func (ifStmtContainer IfStmtContainer) GetPos() SEPos {
+	return ifStmtContainer.Pos
 }
