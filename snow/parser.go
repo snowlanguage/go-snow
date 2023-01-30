@@ -258,26 +258,17 @@ func (parser *Parser) ifStatement() (Stmt, error) {
 		return nil, err
 	}
 
-	fmt.Println("in")
-
 	ifStmt, err := parser.statement()
 	if err != nil {
 		return nil, err
 	}
 
-	fmt.Println("out")
-
 	firstIf := NewIfStmt(ifExpr, ifStmt, *startPos.CreateSEPos(ifStmt.GetPos().End, ifStmt.GetPos().File))
-
-	fmt.Println("1")
 
 	stmts := make([]IfStmt, 0)
 	stmts = append(stmts, *firstIf)
 
-	fmt.Println(parser.currentToken.TType)
-
 	for parser.currentToken.TType == ELIF {
-		fmt.Println(parser.currentToken)
 		elifStartPos := parser.currentToken.Pos.Start
 
 		parser.advance()
@@ -291,15 +282,12 @@ func (parser *Parser) ifStatement() (Stmt, error) {
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println("2")
 
 		stmts = append(stmts, *NewIfStmt(
 			elifExpr,
 			elifStmt,
 			*elifStartPos.CreateSEPos(elifStmt.GetPos().End, elifExpr.GetPosition().File),
 		))
-
-		fmt.Println(parser.currentToken)
 	}
 
 	if parser.currentToken.TType == ELSE {
